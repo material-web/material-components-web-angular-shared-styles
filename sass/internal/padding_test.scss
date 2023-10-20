@@ -1,0 +1,208 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// go/keep-sorted start
+@use './padding';
+@use 'third_party/javascript/node_modules/sass_true/true' as test;
+// go/keep-sorted end
+
+@include test.describe('padding') {
+  @include test.describe('merge-logical-padding-values()') {
+    @include test.it(
+      'does not change the given map the if padding key does not exist'
+    ) {
+      $theme: padding.merge-logical-padding-values(
+        (
+          'foo': null,
+        ),
+        'padding'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'foo': null,
+        )
+      );
+    }
+
+    @include test.it(
+      'expands single value into indivdual padding side values'
+    ) {
+      $theme: padding.merge-logical-padding-values(
+        (
+          'padding': 4px,
+        ),
+        'padding'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'padding': 4px,
+          'padding-block-start': 4px,
+          'padding-inline-end': 4px,
+          'padding-block-end': 4px,
+          'padding-inline-start': 4px,
+        )
+      );
+    }
+
+    @include test.it(
+      'expands single value lists into indivdual padding side values'
+    ) {
+      $theme: padding.merge-logical-padding-values(
+        (
+          'padding': (
+            4px,
+          ),
+        ),
+        'padding'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'padding': (
+            4px,
+          ),
+          'padding-block-start': 4px,
+          'padding-inline-end': 4px,
+          'padding-block-end': 4px,
+          'padding-inline-start': 4px,
+        )
+      );
+    }
+
+    @include test.it(
+      'expands two value lists into indivdual padding side values'
+    ) {
+      $theme: padding.merge-logical-padding-values(
+        (
+          'padding': (
+            4px,
+            8px,
+          ),
+        ),
+        'padding'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'padding': (
+            4px,
+            8px,
+          ),
+          'padding-block-start': 4px,
+          'padding-inline-end': 8px,
+          'padding-block-end': 4px,
+          'padding-inline-start': 8px,
+        )
+      );
+    }
+
+    @include test.it(
+      'expands three value lists into indivdual padding side values'
+    ) {
+      $theme: padding.merge-logical-padding-values(
+        (
+          'padding': (
+            4px,
+            8px,
+            12px,
+          ),
+        ),
+        'padding'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'padding': (
+            4px,
+            8px,
+            12px,
+          ),
+          'padding-block-start': 4px,
+          'padding-inline-end': 8px,
+          'padding-block-end': 12px,
+          'padding-inline-start': 8px,
+        )
+      );
+    }
+
+    @include test.it(
+      'expands four value lists into indivdual padding side values'
+    ) {
+      $theme: padding.merge-logical-padding-values(
+        (
+          'padding': (
+            1px,
+            2px,
+            3px,
+            4px,
+          ),
+        ),
+        'padding'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'padding': (
+            1px,
+            2px,
+            3px,
+            4px,
+          ),
+          'padding-block-start': 1px,
+          'padding-inline-end': 2px,
+          'padding-block-end': 3px,
+          'padding-inline-start': 4px,
+        )
+      );
+    }
+  }
+
+  @include test.it(
+    'expands >4 value lists into indivdual padding side values, ignoring extra values'
+  ) {
+    $theme: padding.merge-logical-padding-values(
+      (
+        'padding': (
+          1px,
+          2px,
+          3px,
+          4px,
+          5px,
+          6px,
+        ),
+      ),
+      'padding'
+    );
+
+    @include test.assert-equal(
+      $theme,
+      (
+        'padding': (
+          1px,
+          2px,
+          3px,
+          4px,
+          5px,
+          6px,
+        ),
+        'padding-block-start': 1px,
+        'padding-inline-end': 2px,
+        'padding-block-end': 3px,
+        'padding-inline-start': 4px,
+      )
+    );
+  }
+}

@@ -1,0 +1,761 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+ // stylelint-disable selector-class-pattern --
+// Selector '.mdc-*' should only be used in this project.
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'third_party/javascript/material/m3/sass/focusring/focus_ring_outward';
+@use 'third_party/javascript/material/m3/sass/ripple/ripple';
+@use 'third_party/javascript/material/m3/sass/internal/theme';
+@use 'third_party/javascript/material/m3/sass/internal/vars';
+@use 'third_party/javascript/material/m3/sass/internal/colors';
+@use 'third_party/javascript/material_components_web/theme/theme-color';
+
+/// The list of supported themeable tokens for this component variant.
+$supported-tokens: (
+  // go/keep-sorted start
+  'container-shape',
+  'container-size',
+  'focus-ring-color',
+  'focus-ring-offset',
+  'selected-container-color',
+  'selected-disabled-container-color',
+  'selected-disabled-container-opacity',
+  'selected-disabled-icon-color',
+  'selected-hover-container-color',
+  'selected-hover-icon-color',
+  'selected-hover-state-layer-color',
+  'selected-hover-state-layer-opacity',
+  'selected-icon-color',
+  'selected-pressed-container-color',
+  'selected-pressed-icon-color',
+  'selected-pressed-state-layer-color',
+  'selected-pressed-state-layer-opacity',
+  'state-layer-size',
+  'touch-target-size',
+  'unselected-disabled-container-opacity',
+  'unselected-disabled-outline-color',
+  'unselected-hover-outline-color',
+  'unselected-hover-state-layer-color',
+  'unselected-hover-state-layer-opacity',
+  'unselected-outline-color',
+  'unselected-pressed-outline-color',
+  'unselected-pressed-state-layer-color',
+  'unselected-pressed-state-layer-opacity',
+  // go/keep-sorted end
+);
+
+/// Returns value in $map associated with $key. Throws an error for any $key
+/// not present in $supported-tokens.
+/// @see $supported-tokens
+/// @param {Map} $map - The input map.
+/// @param {String} $key - The key in the map.
+/// @return {Any} Returns the value from the map if it exists.
+/// @throw Error if the $key is not included in the $supported-tokens list.
+@function _token($map, $key) {
+  @if not list.index($supported-tokens, $key) {
+    @error 'Token "#{$key}" is not a supported token for component "checkbox". Consider adding it to $supported-tokens.';
+  }
+  @return map.get($map, $key);
+}
+
+/// Returns a copy of the map only containing the supported tokens.
+/// @see $supported-tokens
+/// @param {Map} $map - The input map.
+/// @return {Map} Returns the map only with supported tokens.
+@function pick($map) {
+  $result: ();
+  @each $key, $val in $map {
+    @if list.index($supported-tokens, $key) {
+      $result: map.set($result, $key, map.get($map, $key));
+    }
+  }
+  @return $result;
+}
+
+/// Adds token values that Checkbox theme API supports, but is not reflected
+/// in Carbon. We do this in order to maintain a consistent API across token
+/// versions.
+/// @param {Map} $theme - The input map.
+/// @param {Map} $sys-color - System color palette.
+/// @return {Map} Returns the map with additional tokens.
+@function add-tokens-outside-carbon($theme, $sys-color) {
+  @return map.merge(
+    $theme,
+    (
+      'focus-ring-color': map.get($sys-color, 'secondary'),
+      'focus-ring-offset': 2px,
+      'touch-target-size': 48px,
+    )
+  );
+}
+
+/// Emits CSS custom properties for the given input map.
+/// Be sure to call theme.create on a theme map before passing it as input.
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to emit.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin abstract-theme($theme) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @error 'Token "#{$key}" is not a supported token for component "checkbox" (see $supported-tokens).';
+    }
+  }
+
+  @include theme.emit($theme);
+}
+
+/// Emits CSS selectors with property/value pairs for the given input map.
+/// Be sure to call theme.create on a theme map before passing it as input.
+/// @see {theme.create}
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to use for CSS values.
+/// @param {Map} $form-field-override-values - Temporary map of form field values based on tokens.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin abstract-styles($theme, $form-field-override-values) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @error 'Token "#{$key}" is not a supported token for component "checkbox" (see $supported-tokens).';
+    }
+  }
+
+  $state-layer-size: _token($theme, 'state-layer-size');
+  $touch-target-size: _token($theme, 'touch-target-size');
+
+  &-checkbox {
+    align-items: center;
+    box-sizing: content-box;
+    cursor: pointer;
+    display: inline-flex;
+    flex: unset;
+    height: $state-layer-size;
+    justify-content: center;
+    line-height: 0;
+    padding: 0;
+    position: relative;
+    vertical-align: bottom;
+    white-space: nowrap;
+    width: $state-layer-size;
+    z-index: 0;
+    flex-shrink: 0;
+
+    @include ripple.theme(
+      (
+        'hover-color': _token($theme, 'unselected-hover-state-layer-color'),
+        'hover-opacity': _token($theme, 'unselected-hover-state-layer-opacity'),
+        'pressed-color': _token($theme, 'unselected-pressed-state-layer-color'),
+        'pressed-opacity':
+          _token($theme, 'unselected-pressed-state-layer-opacity'),
+        'shape': 50%,
+      )
+    );
+
+    @include focus_ring_outward.theme(
+      (
+        'color': map.get($theme, 'focus-ring-color'),
+        'offset': map.get($theme, 'focus-ring-offset'),
+        'target-shape': 50%,
+      )
+    );
+  }
+
+  &-checkbox[hidden] {
+    display: none;
+  }
+
+  &-checkbox--disabled {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  &-checkbox--selected {
+    @include ripple.theme(
+      (
+        'hover-color': _token($theme, 'selected-hover-state-layer-color'),
+        'hover-opacity': _token($theme, 'selected-hover-state-layer-opacity'),
+        'pressed-color': _token($theme, 'selected-pressed-state-layer-color'),
+        'pressed-opacity':
+          _token($theme, 'selected-pressed-state-layer-opacity'),
+      )
+    );
+  }
+
+  &-checkbox__native-control:disabled ~ &-checkbox__ripple {
+    @include ripple.theme(
+      (
+        'hover-opacity': 0,
+        'pressed-opacity': 0,
+      )
+    );
+  }
+
+  &-checkbox__ripple {
+    // Ensure ripple is behind the checkmark
+    z-index: -1;
+  }
+
+  &-checkbox__native-control:focus-visible ~ &-checkbox__focusring {
+    @include focus_ring_outward.theme(
+      (
+        'display': block,
+      )
+    );
+  }
+
+  // Touch target
+  &-checkbox--touch {
+    margin: max(calc(($touch-target-size - $state-layer-size) / 2), 0px);
+  }
+
+  &-checkbox--touch &-checkbox__native-control {
+    // If the state-layer-size is bigger than 48px it should also be touch-able
+    $effective-touch-target-size: max($touch-target-size, $state-layer-size);
+    height: $effective-touch-target-size;
+    left: unset;
+    right: unset;
+    top: unset;
+    width: $effective-touch-target-size;
+  }
+
+  &-checkbox__native-control {
+    cursor: inherit;
+    height: $state-layer-size;
+    left: 0;
+    margin: 0;
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: $state-layer-size;
+  }
+  &-checkbox__native-control:disabled {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  &-checkbox__background {
+    align-items: center;
+    background-color: transparent;
+    border: 2px solid currentColor;
+    box-sizing: border-box;
+    display: inline-flex;
+    justify-content: center;
+    left: unset;
+    pointer-events: none;
+    position: absolute;
+    top: unset;
+
+    border-radius: _token($theme, 'container-shape');
+    height: _token($theme, 'container-size');
+    width: _token($theme, 'container-size');
+  }
+
+  &-checkbox__checkmark {
+    bottom: 0;
+    box-sizing: border-box;
+    left: 0;
+    opacity: 1;
+    padding: 7%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+  }
+  &-checkbox__native-control[aria-checked='mixed']
+    ~ &-checkbox__background
+    &-checkbox__checkmark {
+    opacity: 0;
+    transform: rotate(45deg);
+  }
+
+  &-checkbox__checkmark-path {
+    stroke-dasharray: 29.7833385;
+    stroke-dashoffset: 29.7833385;
+    stroke-width: 4px;
+    stroke: currentColor;
+  }
+  &-checkbox__native-control:checked
+    ~ &-checkbox__background
+    &-checkbox__checkmark-path {
+    stroke-dashoffset: 0;
+  }
+
+  &-checkbox__mixedmark {
+    border-style: solid;
+    border-width: 1px;
+    height: 0;
+    margin-inline: 15%;
+    opacity: 0;
+    /*rtl:ignore*/
+    transform: scaleX(0) rotate(0deg);
+    width: 100%;
+  }
+  &-checkbox__native-control[aria-checked='mixed']
+    ~ &-checkbox__background
+    &-checkbox__mixedmark {
+    opacity: 1;
+    transform: scaleX(1) rotate(0deg);
+  }
+
+  &-checkbox__label {
+    padding-left: 0;
+  }
+
+  // Icon color
+  &-checkbox__native-control:enabled
+    ~ &-checkbox__background
+    &-checkbox__checkmark {
+    color: _token($theme, 'selected-icon-color');
+  }
+  &-checkbox__native-control:enabled
+    ~ &-checkbox__background
+    &-checkbox__mixedmark {
+    background-color: _token($theme, 'selected-icon-color');
+    border-color: _token($theme, 'selected-icon-color');
+  }
+
+  &-checkbox__native-control:hover
+    ~ &-checkbox__background
+    &-checkbox__checkmark {
+    color: _token($theme, 'selected-hover-icon-color');
+  }
+  &-checkbox__native-control:hover
+    ~ &-checkbox__background
+    &-checkbox__mixedmark {
+    background-color: _token($theme, 'selected-hover-icon-color');
+    border-color: _token($theme, 'selected-hover-icon-color');
+  }
+
+  &-checkbox__native-control:active
+    ~ &-checkbox__background
+    &-checkbox__checkmark {
+    color: _token($theme, 'selected-pressed-icon-color');
+  }
+  &-checkbox__native-control:active
+    ~ &-checkbox__background
+    &-checkbox__mixedmark {
+    background-color: _token($theme, 'selected-pressed-icon-color');
+    border-color: _token($theme, 'selected-pressed-icon-color');
+  }
+
+  @media screen and (forced-colors: active) {
+    &-checkbox__native-control:enabled
+      ~ &-checkbox__background
+      &-checkbox__checkmark {
+      color: ButtonText;
+    }
+    &-checkbox__native-control:enabled
+      ~ &-checkbox__background
+      &-checkbox__mixedmark {
+      background-color: ButtonText;
+      border-color: ButtonText;
+    }
+  }
+
+  &-checkbox__native-control:disabled
+    ~ &-checkbox__background
+    &-checkbox__checkmark {
+    color: _token($theme, 'selected-disabled-icon-color');
+    @media screen and (forced-colors: active) {
+      color: ButtonFace;
+    }
+  }
+  &-checkbox__native-control:disabled
+    ~ &-checkbox__background
+    &-checkbox__mixedmark {
+    background-color: _token($theme, 'selected-disabled-icon-color');
+    border-color: _token($theme, 'selected-disabled-icon-color');
+    @media screen and (forced-colors: active) {
+      background-color: ButtonFace;
+      border-color: ButtonFace;
+    }
+  }
+
+  // Container and outline color
+  $unselected-color: _token($theme, 'unselected-outline-color');
+  $selected-color: _token($theme, 'selected-container-color');
+
+  &-checkbox__background {
+    border-color: $unselected-color;
+  }
+  &-checkbox__native-control:checked ~ &-checkbox__background,
+  &-checkbox__native-control[aria-checked='mixed'] ~ &-checkbox__background {
+    background-color: $selected-color;
+    border-color: $selected-color;
+  }
+
+  $unselected-hover-color: _token($theme, 'unselected-hover-outline-color');
+  $selected-hover-color: _token($theme, 'selected-hover-container-color');
+
+  &-checkbox__native-control:hover ~ &-checkbox__background {
+    border-color: $unselected-hover-color;
+  }
+  &-checkbox__native-control:checked:hover ~ &-checkbox__background,
+  &-checkbox__native-control[aria-checked='mixed']:hover
+    ~ &-checkbox__background {
+    background-color: $selected-hover-color;
+    border-color: $selected-hover-color;
+  }
+
+  $unselected-active-color: _token($theme, 'unselected-pressed-outline-color');
+  $selected-active-color: _token($theme, 'selected-pressed-container-color');
+
+  &-checkbox__native-control:active ~ &-checkbox__background {
+    border-color: $unselected-active-color;
+  }
+  &-checkbox__native-control:checked:active ~ &-checkbox__background,
+  &-checkbox__native-control[aria-checked='mixed']:active
+    ~ &-checkbox__background {
+    background-color: $selected-active-color;
+    border-color: $selected-active-color;
+  }
+
+  &-checkbox__native-control:disabled ~ &-checkbox__background {
+    border-color: _token($theme, 'unselected-disabled-outline-color');
+    opacity: _token($theme, 'unselected-disabled-container-opacity');
+
+    @media screen and (forced-colors: active) {
+      border-color: GrayText;
+      opacity: 1;
+    }
+  }
+  &-checkbox__native-control:checked:disabled ~ &-checkbox__background,
+  &-checkbox__native-control[aria-checked='mixed']:disabled
+    ~ &-checkbox__background {
+    background-color: _token($theme, 'selected-disabled-container-color');
+    border-color: transparent;
+    opacity: _token($theme, 'selected-disabled-container-opacity');
+
+    @media screen and (forced-colors: active) {
+      background-color: GrayText;
+      border-color: GrayText;
+      opacity: 1;
+    }
+  }
+
+  // Form field overrides
+  // TODO(b/246297033): Remove these hacks when GM3 Formfield is ready to use.
+  &-checkbox__form-field {
+    gap: 4px;
+  }
+
+  &-checkbox__form-field .mdc-label {
+    color: map.get($form-field-override-values, 'on-surface');
+    font-size: map.get($form-field-override-values, 'body-large-size');
+  }
+
+  &-checkbox__form-field--disabled .mdc-label {
+    color: map.get($form-field-override-values, 'on-surface-variant');
+  }
+
+  &-checkbox__form-field.mdc-form-field--align-end &-checkbox--touch {
+    margin-left: 0;
+  }
+
+  &-checkbox__form-field.mdc-form-field--align-end .mdc-label {
+    padding-right: 0px;
+  }
+
+  &-checkbox__form-field:not(.mdc-form-field--align-end) &-checkbox--touch {
+    margin-right: 0;
+  }
+
+  &-checkbox__form-field:not(.mdc-form-field--align-end) .mdc-label {
+    padding-left: 0px;
+  }
+
+  // Animation: checkmark/mixedmark
+  @include _mark-keyframes;
+
+  :is(
+      &-checkbox--anim-unchecked-checked,
+      &-checkbox--anim-unchecked-indeterminate,
+      &-checkbox--anim-checked-unchecked,
+      &-checkbox--anim-indeterminate-unchecked
+    )
+    &-checkbox__background {
+    animation-duration: 90ms * 2;
+    animation-timing-function: linear;
+  }
+
+  &-checkbox--anim-unchecked-checked &-checkbox__checkmark-path {
+    // Instead of delaying the animation, we simply multiply its length by 2 and begin the
+    // animation at 50% in order to prevent a flash of styles applied to a checked checkmark
+    // as the background is fading in before the animation begins.
+    animation: checkbox-unchecked-checked-checkmark-path (90ms * 2) linear 0s;
+  }
+
+  &-checkbox--anim-unchecked-indeterminate &-checkbox__mixedmark {
+    animation: checkbox-unchecked-indeterminate-mixedmark 90ms linear 0s;
+  }
+
+  &-checkbox--anim-checked-unchecked &-checkbox__checkmark-path {
+    animation: checkbox-checked-unchecked-checkmark-path 90ms linear 0s;
+  }
+
+  &-checkbox--anim-checked-indeterminate &-checkbox__checkmark {
+    animation: checkbox-checked-indeterminate-checkmark 90ms linear 0s;
+  }
+
+  &-checkbox--anim-checked-indeterminate &-checkbox__mixedmark {
+    animation: checkbox-checked-indeterminate-mixedmark 90ms linear 0s;
+  }
+
+  &-checkbox--anim-indeterminate-checked &-checkbox__checkmark {
+    animation: checkbox-indeterminate-checked-checkmark 500ms linear 0s;
+  }
+
+  &-checkbox--anim-indeterminate-checked &-checkbox__mixedmark {
+    animation: checkbox-indeterminate-checked-mixedmark 500ms linear 0s;
+  }
+
+  &-checkbox--anim-indeterminate-unchecked &-checkbox__mixedmark {
+    animation: checkbox-indeterminate-unchecked-mixedmark (500ms * 0.6) linear
+      0s;
+  }
+
+  // Animation: background
+  @keyframes checkbox-fade-in-background {
+    0% {
+      border-color: $unselected-color;
+      background-color: transparent;
+    }
+    50% {
+      border-color: $selected-color;
+      background-color: $selected-color;
+    }
+  }
+  @keyframes checkbox-fade-out-background {
+    0%,
+    80% {
+      border-color: $selected-color;
+      background-color: $selected-color;
+    }
+    100% {
+      border-color: $unselected-color;
+      background-color: transparent;
+    }
+  }
+
+  @keyframes checkbox-fade-in-background-hover {
+    0% {
+      border-color: $unselected-hover-color;
+      background-color: transparent;
+    }
+    50% {
+      border-color: $selected-hover-color;
+      background-color: $selected-hover-color;
+    }
+  }
+  @keyframes checkbox-fade-out-background-hover {
+    0%,
+    80% {
+      border-color: $selected-hover-color;
+      background-color: $selected-hover-color;
+    }
+    100% {
+      border-color: $unselected-hover-color;
+      background-color: transparent;
+    }
+  }
+
+  @keyframes checkbox-fade-in-background-active {
+    0% {
+      border-color: $unselected-active-color;
+      background-color: transparent;
+    }
+    50% {
+      border-color: $selected-active-color;
+      background-color: $selected-active-color;
+    }
+  }
+  @keyframes checkbox-fade-out-background-active {
+    0%,
+    80% {
+      border-color: $selected-active-color;
+      background-color: $selected-active-color;
+    }
+    100% {
+      border-color: $unselected-active-color;
+      background-color: transparent;
+    }
+  }
+
+  :is(
+      &-checkbox--anim-unchecked-checked,
+      &-checkbox--anim-unchecked-indeterminate
+    )
+    &-checkbox__native-control
+    ~ &-checkbox__background {
+    animation-name: checkbox-fade-in-background;
+  }
+  :is(
+      &-checkbox--anim-checked-unchecked,
+      &-checkbox--anim-indeterminate-unchecked
+    )
+    &-checkbox__native-control
+    ~ &-checkbox__background {
+    animation-name: checkbox-fade-out-background;
+  }
+
+  :is(
+      &-checkbox--anim-unchecked-checked,
+      &-checkbox--anim-unchecked-indeterminate
+    )
+    &-checkbox__native-control:hover
+    ~ &-checkbox__background {
+    animation-name: checkbox-fade-in-background-hover;
+  }
+  :is(
+      &-checkbox--anim-checked-unchecked,
+      &-checkbox--anim-indeterminate-unchecked
+    )
+    &-checkbox__native-control:hover
+    ~ &-checkbox__background {
+    animation-name: checkbox-fade-out-background-hover;
+  }
+
+  :is(
+      &-checkbox--anim-unchecked-checked,
+      &-checkbox--anim-unchecked-indeterminate
+    )
+    &-checkbox__native-control:active
+    ~ &-checkbox__background {
+    animation-name: checkbox-fade-in-background-active;
+  }
+  :is(
+      &-checkbox--anim-checked-unchecked,
+      &-checkbox--anim-indeterminate-unchecked
+    )
+    &-checkbox__native-control:active
+    ~ &-checkbox__background {
+    animation-name: checkbox-fade-out-background-active;
+  }
+}
+
+@mixin _mark-keyframes {
+  @keyframes checkbox-unchecked-checked-checkmark-path {
+    0%,
+    50% {
+      stroke-dashoffset: 29.7833385;
+    }
+
+    50% {
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes checkbox-unchecked-indeterminate-mixedmark {
+    0%,
+    68.2% {
+      transform: scaleX(0);
+    }
+
+    68.2% {
+      animation-timing-function: cubic-bezier(0, 0, 0, 1);
+    }
+
+    100% {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes checkbox-checked-unchecked-checkmark-path {
+    from {
+      animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+
+    to {
+      opacity: 0;
+      stroke-dashoffset: 29.7833385 * -1;
+    }
+  }
+
+  @keyframes checkbox-checked-indeterminate-checkmark {
+    from {
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+      opacity: 1;
+      /*rtl:ignore*/
+      transform: rotate(0deg);
+    }
+
+    to {
+      opacity: 0;
+      /*rtl:ignore*/
+      transform: rotate(45deg);
+    }
+  }
+
+  @keyframes checkbox-indeterminate-checked-checkmark {
+    from {
+      animation-timing-function: cubic-bezier(0.14, 0, 0, 1);
+      opacity: 0;
+      /*rtl:ignore*/
+      transform: rotate(45deg);
+    }
+
+    to {
+      opacity: 1;
+      /*rtl:ignore*/
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes checkbox-checked-indeterminate-mixedmark {
+    from {
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+      opacity: 0;
+      /*rtl:ignore*/
+      transform: rotate(-45deg);
+    }
+
+    to {
+      opacity: 1;
+      /*rtl:ignore*/
+      transform: rotate(0deg);
+    }
+  }
+
+  @keyframes checkbox-indeterminate-checked-mixedmark {
+    from {
+      animation-timing-function: cubic-bezier(0.14, 0, 0, 1);
+      opacity: 1;
+      /*rtl:ignore*/
+      transform: rotate(0deg);
+    }
+
+    to {
+      opacity: 0;
+      transform: rotate(315deg);
+    }
+  }
+
+  @keyframes checkbox-indeterminate-unchecked-mixedmark {
+    0% {
+      animation-timing-function: linear;
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    32.8%,
+    100% {
+      opacity: 0;
+      /*rtl:ignore*/
+      transform: scaleX(0);
+    }
+  }
+}

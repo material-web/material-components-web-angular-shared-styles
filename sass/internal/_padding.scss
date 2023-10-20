@@ -1,0 +1,101 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// go/keep-sorted start
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:meta';
+@use 'sass:string';
+// go/keep-sorted end
+
+/// Adds -block-start, -block-end, -inline-start, -inline-end padding values as new tokens with the same
+/// prefix as the original key.
+///
+/// @example - scss
+///   $theme: merge-logical-padding-values((
+///     'container-padding': (1px 2px 3px 4px),
+///     'color': red,
+///   ), 'container-padding');
+///
+/// @example - css
+///   $theme: (
+///     'container-padding': (1px 2px 3px 4px),
+///     'container-padding-block-start': 1px,
+///     'container-padding-inline-end':  2px,
+///     'container-padding-block-end': 3px,
+///     'container-padding-inline-start': 4px,
+///     'color': red,
+///   );
+///
+/// @param {Map} $map - The theme map.
+/// @param {String} $padding-key - The key in the theme map for the padding value.
+/// @return {Map} A map with logical tokens for each side's value.
+@function merge-logical-padding-values($map, $padding-key) {
+  $padding: map.get($map, $padding-key);
+  @if not $padding {
+    @return $map;
+  }
+
+  @if meta.type-of($padding) != 'list' {
+    @return map.merge(
+      $map,
+      (
+        '#{$padding-key}-block-start': $padding,
+        '#{$padding-key}-inline-end': $padding,
+        '#{$padding-key}-block-end': $padding,
+        '#{$padding-key}-inline-start': $padding,
+      )
+    );
+  }
+
+  @if list.length($padding) == 1 {
+    @return map.merge(
+      $map,
+      (
+        '#{$padding-key}-block-start': list.nth($padding, 1),
+        '#{$padding-key}-inline-end': list.nth($padding, 1),
+        '#{$padding-key}-block-end': list.nth($padding, 1),
+        '#{$padding-key}-inline-start': list.nth($padding, 1),
+      )
+    );
+  }
+
+  @if list.length($padding) == 2 {
+    @return map.merge(
+      $map,
+      (
+        '#{$padding-key}-block-start': list.nth($padding, 1),
+        '#{$padding-key}-inline-end': list.nth($padding, 2),
+        '#{$padding-key}-block-end': list.nth($padding, 1),
+        '#{$padding-key}-inline-start': list.nth($padding, 2),
+      )
+    );
+  }
+
+  @if list.length($padding) == 3 {
+    @return map.merge(
+      $map,
+      (
+        '#{$padding-key}-block-start': list.nth($padding, 1),
+        '#{$padding-key}-inline-end': list.nth($padding, 2),
+        '#{$padding-key}-block-end': list.nth($padding, 3),
+        '#{$padding-key}-inline-start': list.nth($padding, 2),
+      )
+    );
+  }
+
+  @return map.merge(
+    $map,
+    (
+      '#{$padding-key}-block-start': list.nth($padding, 1),
+      '#{$padding-key}-inline-end': list.nth($padding, 2),
+      '#{$padding-key}-block-end': list.nth($padding, 3),
+      '#{$padding-key}-inline-start': list.nth($padding, 4),
+    )
+  );
+}

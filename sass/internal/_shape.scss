@@ -1,0 +1,114 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// go/keep-sorted start
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:meta';
+@use 'sass:string';
+// go/keep-sorted end
+
+/// Determines if a string is a logical border radius property.
+///
+/// @param {String} $key - The string to check.
+/// @return {Boolean} If the string is a logical border property.
+@function is-logical-border-property($key) {
+  @each $suffix in ('-start-start', '-start-end', '-end-end', '-end-start') {
+    @if string.index($key, $suffix) {
+      @return true;
+    }
+  }
+  @return false;
+}
+
+/// Adds logical border radius values as new tokens with the same prefix as the
+/// shape key.
+///
+/// @example - scss
+///   $theme: merge-logical-border-radius((
+///     'shape': (1px 2px 3px 4px),
+///     'color': red,
+///   ), 'shape');
+///
+/// @example - css
+///   $theme: (
+///     'shape': (1px 2px 3px 4px),
+///     'shape-start-start': 1px,
+///     'shape-start-end':  2px,
+///     'shape-end-end': 3px,
+///     'shape-end-start': 4px,
+///     'color': red,
+///   );
+///
+/// @param {Map} $map - The theme map.
+/// @param {String} $shape-key - The key in the theme map for the shape value.
+/// @return {Map} A map with logical tokens for each corner's value.
+@function merge-logical-border-radius($map, $shape-key) {
+  $shape: map.get($map, $shape-key);
+  @if not $shape {
+    @return $map;
+  }
+
+  @if meta.type-of($shape) != 'list' {
+    @return map.merge(
+      $map,
+      (
+        '#{$shape-key}-start-start': $shape,
+        '#{$shape-key}-start-end': $shape,
+        '#{$shape-key}-end-end': $shape,
+        '#{$shape-key}-end-start': $shape,
+      )
+    );
+  }
+
+  @if list.length($shape) == 1 {
+    @return map.merge(
+      $map,
+      (
+        '#{$shape-key}-start-start': list.nth($shape, 1),
+        '#{$shape-key}-start-end': list.nth($shape, 1),
+        '#{$shape-key}-end-end': list.nth($shape, 1),
+        '#{$shape-key}-end-start': list.nth($shape, 1),
+      )
+    );
+  }
+
+  @if list.length($shape) == 2 {
+    @return map.merge(
+      $map,
+      (
+        '#{$shape-key}-start-start': list.nth($shape, 1),
+        '#{$shape-key}-start-end': list.nth($shape, 2),
+        '#{$shape-key}-end-end': list.nth($shape, 1),
+        '#{$shape-key}-end-start': list.nth($shape, 2),
+      )
+    );
+  }
+
+  @if list.length($shape) == 3 {
+    @return map.merge(
+      $map,
+      (
+        '#{$shape-key}-start-start': list.nth($shape, 1),
+        '#{$shape-key}-start-end': list.nth($shape, 2),
+        '#{$shape-key}-end-end': list.nth($shape, 3),
+        '#{$shape-key}-end-start': list.nth($shape, 2),
+      )
+    );
+  }
+
+  @return map.merge(
+    $map,
+    (
+      '#{$shape-key}-start-start': list.nth($shape, 1),
+      '#{$shape-key}-start-end': list.nth($shape, 2),
+      '#{$shape-key}-end-end': list.nth($shape, 3),
+      '#{$shape-key}-end-start': list.nth($shape, 4),
+    )
+  );
+}

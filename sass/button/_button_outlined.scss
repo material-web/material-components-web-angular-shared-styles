@@ -1,0 +1,143 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'third_party/javascript/material/m3/sass/internal/colors';
+@use 'third_party/javascript/material/m3/sass/internal/theme';
+@use 'third_party/javascript/material/m3/sass/focusring/focus_ring_outward';
+
+/// The list of supported themeable tokens for this component variant.
+$supported-tokens: (
+  // go/keep-sorted start
+  'container-shape',
+  'disabled-outline-color',
+  'disabled-outline-opacity',
+  'focus-outline-color',
+  'hover-outline-color',
+  'outline-color',
+  'outline-width',
+  'pressed-outline-color',
+  // go/keep-sorted end
+);
+
+/// Returns value in $map associated with $key. Throws an error for any $key
+/// not present in $supported-tokens.
+/// @see $supported-tokens
+/// @param {Map} $map - The input map.
+/// @param {String} $key - The key in the map.
+/// @return {Any} Returns the value from the map if it exists.
+/// @throw Error if the $key is not included in the $supported-tokens list.
+@function _token($map, $key) {
+  @if not list.index($supported-tokens, $key) {
+    @error 'Token "#{$key}" is not a supported token for component "button_outlined". Consider adding it to $supported-tokens.';
+  }
+  @return map.get($map, $key);
+}
+
+/// Returns a copy of the map only containing the supported tokens.
+/// @see $supported-tokens
+/// @param {Map} $map - The input map.
+/// @return {Map} Returns the map only with supported tokens.
+@function pick($map) {
+  $result: ();
+  @each $key, $val in $map {
+    @if list.index($supported-tokens, $key) {
+      $result: map.set($result, $key, map.get($map, $key));
+    }
+  }
+  @return $result;
+}
+
+/// Resolve tokens, transforming input into expected output.
+@function resolve-tokens($map) {
+  @return colors.join-color-and-opacity-pairs(
+    $map,
+    (
+      color-key: 'disabled-outline-color',
+      opacity-key: 'disabled-outline-opacity',
+    )
+  );
+}
+
+/// Emits CSS custom properties for the given input map.
+/// Be sure to call theme.create on a theme map before passing it as input.
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to emit.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin abstract-theme($theme) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @error 'Token "#{$key}" is not a supported token for component "button_outlined" (see $supported-tokens).';
+    }
+  }
+
+  @include theme.emit($theme);
+}
+
+/// Emits CSS selectors with property/value pairs for the given input map.
+/// Be sure to call theme.create on a theme map before passing it as input.
+/// @see {theme.create}
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to use for CSS values.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin abstract-styles($theme) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @error 'Token "#{$key}" is not a supported token for component "button_outlined" (see $supported-tokens).';
+    }
+  }
+
+  &-button {
+    border-style: solid;
+    border-width: _token($theme, 'outline-width');
+    border-color: _token($theme, 'outline-color');
+    @include focus_ring_outward.theme(
+      (
+        'target-shape':
+          calc(
+            _token($theme, 'container-shape') - _token($theme, 'outline-width')
+          ),
+      )
+    );
+  }
+  &-button:hover {
+    border-color: _token($theme, 'hover-outline-color');
+  }
+  &-button:focus-visible {
+    border-color: _token($theme, 'focus-outline-color');
+  }
+  &-button:active {
+    border-color: _token($theme, 'pressed-outline-color');
+  }
+  &-button:disabled {
+    border-color: _token($theme, 'disabled-outline-color');
+    @media screen and (forced-colors: active) {
+      border-color: GrayText;
+    }
+  }
+
+  &-button__touch {
+    inline-size: max(48px, 100% + (_token($theme, 'outline-width') * 2));
+    inset: 50% calc(_token($theme, 'outline-width') * -1) 0;
+  }
+
+  &-button--icon-leading {
+    padding-inline-start: 16px;
+  }
+  &-button--icon-leading &-button__icon-slot :is(i, img, svg) {
+    margin-inline-end: 8px;
+  }
+
+  &-button--icon-trailing {
+    padding-inline-end: 16px;
+  }
+  &-button--icon-trailing &-button__icon-slot :is(i, img, svg) {
+    margin-inline-start: 8px;
+  }
+}

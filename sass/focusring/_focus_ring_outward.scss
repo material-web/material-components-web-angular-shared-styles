@@ -1,0 +1,133 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'third_party/javascript/material/m3/sass/internal/theme';
+@use 'third_party/javascript/material/m3/sass/internal/shape';
+
+/// The list of supported themeable tokens for this component variant.
+$supported-tokens: (
+  // go/keep-sorted start
+  'color',
+  'display',
+  'offset',
+  'target-shape',
+  'track-width',
+  // go/keep-sorted end
+);
+
+/// Returns value in $map associated with $key. Throws an error for any $key
+/// not present in $supported-tokens.
+/// @see $supported-tokens
+/// @param {Map} $map - The input map.
+/// @param {String} $key - The key in the map.
+/// @return {Any} Returns the value from the map if it exists.
+/// @throw Error if the $key is not included in the $supported-tokens list.
+@function _token($map, $key) {
+  @if not list.index($supported-tokens, $key) {
+    @if not shape.is-logical-border-property($key) {
+      @error 'Token "#{$key}" is not a supported token for component "focus-ring-outward". Consider adding it to $supported-tokens.';
+    }
+  }
+  @return map.get($map, $key);
+}
+
+/// Emits CSS custom properties for the given input map.
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to emit.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin theme($theme) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @if not shape.is-logical-border-property($key) {
+        @error 'Token "#{$key}" is not a supported token for component "focus-ring-outward" (see $supported-tokens).';
+      }
+    }
+  }
+
+  $theme: shape.merge-logical-border-radius($theme, 'target-shape');
+  // Remove the key so it isn't included in the CSS output.
+  $theme: map.remove($theme, 'target-shape');
+  $theme: theme.create($theme, 'gm3-focus-ring-outward');
+  @include theme.emit($theme);
+}
+
+/// Emits CSS selectors with property/value pairs for the given input map.
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to use for CSS values.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin styles($theme) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @if not shape.is-logical-border-property($key) {
+        @error 'Token "#{$key}" is not a supported token for component "focus-ring-outward" (see $supported-tokens).';
+      }
+    }
+  }
+
+  $theme: shape.merge-logical-border-radius($theme, 'target-shape');
+  $theme: theme.create($theme, 'gm3-focus-ring-outward');
+  &-focusringoutward {
+    display: _token($theme, 'display');
+    pointer-events: none;
+    position: absolute;
+
+    // Focus rings should render above other elements by default (although
+    // note that this does not guarantee that focus rings *always* render
+    // above other elements, due to how z-index and stacking contexts work).
+    // See also: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context
+    z-index: 1;
+
+    $ring-color: _token($theme, 'color');
+    $ring-offset: _token($theme, 'offset');
+    $track-width: _token($theme, 'track-width');
+    $target-shape-start-start: _token($theme, 'target-shape-start-start');
+    $target-shape-start-end: _token($theme, 'target-shape-start-end');
+    $target-shape-end-end: _token($theme, 'target-shape-end-end');
+    $target-shape-end-start: _token($theme, 'target-shape-end-start');
+
+    /// Mold the focus ring to the target shape.
+    /// See the diagram for insights into why the border-radius calc is needed:
+    /// http://screen/9J9CzpCxJxxDHCb.png
+    border-start-start-radius: calc($target-shape-start-start + $ring-offset);
+    border-start-end-radius: calc($target-shape-start-end + $ring-offset);
+    border-end-end-radius: calc($target-shape-end-end + $ring-offset);
+    border-end-start-radius: calc($target-shape-end-start + $ring-offset);
+    inset: calc(-1 * $ring-offset);
+    box-shadow: 0 0 0 $track-width $ring-color;
+    // HCM ignores box-shadow, so a transparent outline is added to ensure
+    // focus ring is shown in HCM.
+    outline: $track-width solid transparent;
+
+    @keyframes gm3-focus-ring-outward-grows {
+      from {
+        box-shadow: 0 0 0 0 $ring-color;
+      }
+      to {
+        box-shadow: 0 0 0 8px $ring-color;
+      }
+    }
+
+    @keyframes gm3-focus-ring-outward-shrinks {
+      from {
+        box-shadow: 0 0 0 8px $ring-color;
+      }
+    }
+
+    animation-name: gm3-focus-ring-outward-grows, gm3-focus-ring-outward-shrinks;
+    animation-duration: 150ms, 450ms;
+    animation-delay: 0s, 150ms;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1),
+      cubic-bezier(0.2, 0, 0, 1);
+
+    @media (prefers-reduced-motion) {
+      animation: none;
+    }
+  }
+}

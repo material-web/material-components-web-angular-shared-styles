@@ -1,0 +1,82 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// go/keep-sorted start
+@use './vars';
+@use 'third_party/javascript/node_modules/sass_true/true' as test;
+// go/keep-sorted end
+
+@include test.describe('vars') {
+  @include test.describe('name()') {
+    @include test.it('returns the name when no fallback is present') {
+      @include test.assert-equal(vars.name(var(--foo)), '--foo');
+    }
+
+    @include test.it('returns the name when fallback is present') {
+      @include test.assert-equal(vars.name(var(--foo, red)), '--foo');
+    }
+
+    @include test.it('returns the name when fallback chain is present') {
+      @include test.assert-equal(
+        vars.name(var(--foo, var(--bar, red))),
+        '--foo'
+      );
+    }
+
+    @include test.it('returns null when malformed var is provided') {
+      @include test.assert-equal(vars.name('vars(nah)'), null);
+    }
+
+    @include test.it('returns null when no var is provided') {
+      @include test.assert-equal(vars.name('not a var'), null);
+    }
+  }
+
+  @include test.describe('fallback()') {
+    @include test.it('returns the fallback when present') {
+      @include test.assert-equal(vars.fallback(var(--foo, red)), 'red');
+    }
+
+    @include test.it('returns the fallback chain when present') {
+      @include test.assert-equal(
+        vars.fallback(var(--foo, var(--bar, red))),
+        'var(--bar, red)'
+      );
+    }
+
+    @include test.it('returns null when no fallback when is present') {
+      @include test.assert-equal(vars.fallback(var(--foo)), null);
+    }
+  }
+
+  @include test.describe('is-var()') {
+    @include test.it('returns true for var without fallback') {
+      @include test.assert-true(vars.is-var(var(--foo)));
+    }
+
+    @include test.it('returns true for var with a fallback') {
+      @include test.assert-true(vars.is-var(var(--foo, red)));
+    }
+
+    @include test.it('returns true for var with a fallback chain') {
+      @include test.assert-true(vars.is-var(var(--foo, var(--bar, red))));
+    }
+
+    @include test.it('returns false for empty string') {
+      @include test.assert-false(vars.is-var(''));
+    }
+
+    @include test.it('returns false for number') {
+      @include test.assert-false(vars.is-var(2));
+    }
+
+    @include test.it('returns false for null') {
+      @include test.assert-false(vars.is-var(null));
+    }
+  }
+}

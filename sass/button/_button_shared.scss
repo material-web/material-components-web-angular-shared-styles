@@ -1,0 +1,309 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'third_party/javascript/material/m3/sass/internal/theme';
+@use 'third_party/javascript/material/m3/sass/internal/colors';
+@use 'third_party/javascript/material/m3/sass/internal/fonts';
+@use 'third_party/javascript/material/m3/sass/focusring/focus_ring_outward';
+@use 'third_party/javascript/material/m3/sass/ripple/ripple';
+
+/// The list of supported themeable tokens for this component variant.
+$supported-tokens: (
+  // go/keep-sorted start
+  'container-height',
+  'container-shape',
+  'disabled-label-text-color',
+  'disabled-label-text-opacity',
+  'focus-label-text-color',
+  'focus-ring-color',
+  'focus-ring-offset',
+  'hover-label-text-color',
+  'hover-state-layer-color',
+  'hover-state-layer-opacity',
+  'label-text-color',
+  'label-text-font',
+  'label-text-size',
+  'label-text-tracking',
+  'label-text-weight',
+  'pressed-label-text-color',
+  'pressed-state-layer-color',
+  'pressed-state-layer-opacity',
+  'with-icon-disabled-icon-color',
+  'with-icon-disabled-icon-opacity',
+  'with-icon-focus-icon-color',
+  'with-icon-hover-icon-color',
+  'with-icon-icon-color',
+  'with-icon-icon-size',
+  'with-icon-pressed-icon-color',
+  // go/keep-sorted end
+);
+
+/// Returns value in $map associated with $key. Throws an error for any $key
+/// not present in $supported-tokens.
+/// @see $supported-tokens
+/// @param {Map} $map - The input map.
+/// @param {String} $key - The key in the map.
+/// @return {Any} Returns the value from the map if it exists.
+/// @throw Error if the $key is not included in the $supported-tokens list.
+@function _token($map, $key) {
+  @if not list.index($supported-tokens, $key) {
+    @error 'Token "#{$key}" is not a supported token for component "button_shared". Consider adding it to $supported-tokens.';
+  }
+  @return map.get($map, $key);
+}
+
+/// Returns a copy of the map only containing the supported tokens.
+/// @see $supported-tokens
+/// @param {Map} $map - The input map.
+/// @return {Map} Returns the map only with supported tokens.
+@function pick($map) {
+  $result: ();
+  @each $key, $val in $map {
+    @if list.index($supported-tokens, $key) {
+      $result: map.set($result, $key, map.get($map, $key));
+    }
+  }
+  @return $result;
+}
+
+/// Adds token values that Button theme API supports, but is not reflected
+/// in Carbon. We do this in order to maintain a consistent API across token
+/// versions.
+/// @param {Map} $theme - The input map.
+/// @param {Map} $sys-color - System color palette.
+/// @return {Map} Returns the map with additional tokens.
+@function add-tokens-outside-carbon($theme, $sys-color) {
+  @return map.merge(
+    $theme,
+    (
+      'focus-ring-color': map.get($sys-color, 'secondary'),
+      'focus-ring-offset': 2px,
+    )
+  );
+}
+
+/// Resolves tokens, transforming input into expected output.
+@function resolve-tokens($map) {
+  // Fonts
+  $map: map.set(
+    $map,
+    'label-text-font',
+    fonts.rename-google-sans-text-and-add-fallbacks(
+      _token($map, 'label-text-font')
+    )
+  );
+  // Colors
+  @return colors.join-color-and-opacity-pairs(
+    $map,
+    (
+      color-key: 'disabled-label-text-color',
+      opacity-key: 'disabled-label-text-opacity',
+    ),
+    (
+      color-key: 'with-icon-disabled-icon-color',
+      opacity-key: 'with-icon-disabled-icon-opacity',
+    )
+  );
+}
+
+/// Emits CSS custom properties for the given input map.
+/// Be sure to call theme.create on a theme map before passing it as input.
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to emit.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin abstract-theme($theme) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @error 'Token "#{$key}" is not a supported token for component "button_shared" (see $supported-tokens).';
+    }
+  }
+
+  @include theme.emit($theme);
+}
+
+/// Emits CSS selectors with property/value pairs for the given input map.
+/// Be sure to call theme.create on a theme map before passing it as input.
+/// @see {theme.create}
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to use for CSS values.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin abstract-styles($theme) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @error 'Token "#{$key}" is not a supported token for component "button_shared" (see $supported-tokens).';
+    }
+  }
+
+  &-button {
+    display: inline-flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    background: transparent;
+    appearance: none;
+    line-height: inherit;
+    text-rendering: inherit;
+    user-select: none;
+    vertical-align: middle;
+    cursor: pointer;
+    min-inline-size: 64px;
+    padding-inline: 24px;
+    block-size: _token($theme, 'container-height');
+    border-radius: _token($theme, 'container-shape');
+
+    @include ripple.theme(
+      (
+        'hover-color': _token($theme, 'hover-state-layer-color'),
+        'hover-opacity': _token($theme, 'hover-state-layer-opacity'),
+        // TODO(b/191298796): Replicating existing behavior, use 'pressed-state-layer-color'.
+        'pressed-color': _token($theme, 'hover-state-layer-color'),
+        'pressed-opacity': _token($theme, 'pressed-state-layer-opacity'),
+      )
+    );
+
+    @include focus_ring_outward.theme(
+      (
+        'target-shape': _token($theme, 'container-shape'),
+        'color': _token($theme, 'focus-ring-color'),
+        'offset': _token($theme, 'focus-ring-offset'),
+      )
+    );
+  }
+
+  &-button__link:focus-visible {
+    outline: none;
+  }
+  &-button:focus-visible,
+  &-button__link:focus-visible ~ &-button__focusring {
+    @include focus_ring_outward.theme(
+      (
+        'display': block,
+      )
+    );
+  }
+
+  &-button:disabled {
+    cursor: default;
+    pointer-events: none;
+
+    @include ripple.theme(
+      (
+        'hover-opacity': 0,
+        'pressed-opacity': 0,
+      )
+    );
+  }
+  &-button--with-tooltip:disabled {
+    pointer-events: auto;
+  }
+
+  &-button[hidden] {
+    display: none;
+  }
+
+  &-button__label {
+    // Necessary such that label is stacked on top of ripple
+    // (since ripple is a positioned element, non-positioned elements
+    // appear under it).
+    position: relative;
+    text-align: center;
+    color: _token($theme, 'label-text-color');
+    font-size: _token($theme, 'label-text-size');
+    font-family: _token($theme, 'label-text-font');
+    font-weight: _token($theme, 'label-text-weight');
+    letter-spacing: _token($theme, 'label-text-tracking');
+  }
+  &-button:hover &-button__label {
+    color: _token($theme, 'hover-label-text-color');
+  }
+  &-button:focus-visible &-button__label {
+    color: _token($theme, 'focus-label-text-color');
+  }
+  &-button:active &-button__label {
+    color: _token($theme, 'pressed-label-text-color');
+  }
+  &-button:disabled &-button__label {
+    color: _token($theme, 'disabled-label-text-color');
+    opacity: _token($theme, 'disabled-label-text-opacity');
+  }
+
+  &-button--ellipsis &-button__label {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &-button__icon-slot {
+    display: none;
+    position: relative;
+    line-height: 0;
+    color: _token($theme, 'with-icon-icon-color');
+  }
+  &-button__icon-slot i,
+  &-button__icon-slot img,
+  &-button__icon-slot svg {
+    display: inline-flex;
+    position: relative;
+    // Needed to override fonts setting `direction: ltr;` which voids the
+    // logical properties we use later on.
+    direction: inherit;
+    // Ensures we don't need to access the i, img, or svg for all color
+    // changes below in response to interactive state.
+    color: inherit;
+    font-size: _token($theme, 'with-icon-icon-size');
+    inline-size: _token($theme, 'with-icon-icon-size');
+    block-size: _token($theme, 'with-icon-icon-size');
+  }
+  &-button:hover &-button__icon-slot {
+    color: _token($theme, 'with-icon-hover-icon-color');
+  }
+  &-button:focus-visible &-button__icon-slot {
+    color: _token($theme, 'with-icon-focus-icon-color');
+  }
+  &-button:active &-button__icon-slot {
+    color: _token($theme, 'with-icon-pressed-icon-color');
+  }
+  &-button:disabled &-button__icon-slot {
+    color: _token($theme, 'with-icon-disabled-icon-color');
+    opacity: _token($theme, 'with-icon-disabled-icon-opacity');
+  }
+  [dir='rtl'] &-button--flip-icon &-button__icon-slot,
+  &-button--flip-icon &-button__icon-slot[dir='rtl'] {
+    /*rtl:ignore*/
+    transform: scaleX(-1);
+  }
+
+  &-button--icon-leading &-button__icon-slot--leading {
+    display: inline-flex;
+  }
+  &-button--icon-trailing &-button__icon-slot--trailing {
+    display: inline-flex;
+  }
+
+  &-button__link {
+    position: absolute;
+    inset: 0;
+  }
+
+  &-button--touch {
+    margin-block: max((48px - _token($theme, 'container-height')) / 2, 0px);
+  }
+  &-button__touch {
+    position: absolute;
+    inset: 50% 0 0;
+    opacity: 0;
+    transform: translateY(-50%);
+    inline-size: max(48px, 100%);
+    block-size: max(48px, 100%);
+  }
+}

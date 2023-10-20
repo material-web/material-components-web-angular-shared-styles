@@ -1,0 +1,124 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// go/keep-sorted start
+@use './vars';
+@use 'sass:map';
+// go/keep-sorted end
+
+/// Transform a user-provided `$theme` map's values into `var()` custom property
+/// values.
+///
+/// Use this function in `theme-styles()` mixins to transform values into
+/// custom property `var()` "slots" that can subsequently be styled via
+/// `theme.emit()` in the `theme()` mixin by the user.
+///
+/// @example - scss
+///   $theme: theme.create((
+///     'label-color': purple
+///   ), 'my-button');
+///
+///
+/// @example - css
+///   $theme: (
+///     'label-color': var(--my-button-label-color, purple),
+///   );
+///
+/// @param {Map} $theme - The theme Map to transform values into custom property
+///     `var()`s.
+/// @param {String} $prefix - Component and variant prefix to prepend for each
+///     token's custom property name.
+/// @return {Map} The provided `$theme` Map whose values are replaced with the
+///     `var()` custom properties.
+@function create($theme, $prefix) {
+  @each $key, $value in $theme {
+    @if $value != null {
+      $theme: map.set($theme, $key, var(--#{$prefix}-#{$key}, $value));
+    }
+  }
+  @return $theme;
+}
+
+/// Transform a user-provided `$theme` map's values into `var()` custom property
+/// values without fallback styles.
+///
+/// Use this function in `theme-styles()` mixins to transform values into
+/// custom property `var()` "slots" that can subsequently be styled via
+/// `theme.emit()` in the `theme()` mixin by the user.
+///
+/// @example - scss
+///   $theme: theme.create((
+///     'label-color': purple
+///   ), 'my-button');
+///
+///
+/// @example - css
+///   $theme: (
+///     'label-color': var(--my-button-label-color),
+///   );
+///
+/// @param {Map} $theme - The theme Map to transform values into custom property
+///     `var()`s.
+/// @param {String} $prefix - Component and variant prefix to prepend for each
+///     token's custom property name.
+/// @return {Map} The provided `$theme` Map whose values are replaced with the
+///     `var()` custom properties.
+@function create-without-fallbacks($theme, $prefix) {
+  @each $key, $value in $theme {
+    @if $value != null {
+      $theme: map.set($theme, $key, var(--#{$prefix}-#{$key}));
+    }
+  }
+  @return $theme;
+}
+
+/// Emits CSS declaration values for a theme map that has been transformed with
+/// `create()`.
+///
+/// Use this in `theme()` mixins to set user-provided token customizations.
+///
+/// @example - scss
+///   $theme: create((
+///     'label-color': purple
+///   ), 'my-button');
+///
+///   .my-button {
+///     @include emit($theme);
+///   }
+///
+/// @example - css
+///   .my-button {
+///     --label-color-label-color: purple;
+///   }
+///
+/// @param {Map} $theme - The theme Map to emit custom property declarations
+///     for.
+@mixin emit($theme) {
+  @each $token, $value in $theme {
+    @if $value {
+      @if not vars.is-var($value) {
+        @error '"#{$token}": #{$value} is not a var(). Call theme.create($theme) before emit($theme).';
+      }
+      #{vars.name($value)}: #{vars.fallback($value)};
+    }
+  }
+}
+
+/// Checks each token from the theme map and throws error on unsupported tokens.
+/// Allows to throw custom errors for the unsupported tokens before checking
+/// on invalid tokens for theme mixin.
+@function check-unsupported-tokens($unsupported-theme-keys, $theme) {
+  @each $token in map.keys($theme) {
+    @if map.has-key($unsupported-theme-keys, $token) {
+      $error-msg: map.get($unsupported-theme-keys, $token);
+      @error 'Unsupported Token "#{$token}": #{$error-msg} ' +
+               'File a feature request via go/gm3-wiz-new-feature-request';
+    }
+  }
+  @return $theme;
+}

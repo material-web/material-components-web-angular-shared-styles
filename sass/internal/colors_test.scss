@@ -1,0 +1,167 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// go/keep-sorted start
+@use './colors';
+@use 'third_party/javascript/node_modules/sass_true/true' as test;
+// go/keep-sorted end
+
+@include test.describe('colors') {
+  @include test.describe('join-color-and-opacity-pairs()') {
+    @include test.it(
+      'joins hex color and opacity pairs and removes the original keys'
+    ) {
+      $got: colors.join-color-and-opacity-pairs(
+        (
+          'foo-color': #f00,
+          'foo-opacity': 0.5,
+          'bar-color': #abcdef,
+          'bar-opacity': 0.2,
+        ),
+        (
+          color-key: 'foo-color',
+          opacity-key: 'foo-opacity',
+        ),
+        (
+          color-key: 'bar-color',
+          opacity-key: 'bar-opacity',
+        )
+      );
+
+      $want: (
+        'foo-color': rgba(255, 0, 0, 0.5),
+        'bar-color': rgba(171, 205, 239, 0.2),
+      );
+
+      @include test.assert-equal($got, $want);
+    }
+
+    @include test.it('joins rgb color and opacity pairs') {
+      $got: colors.join-color-and-opacity-pairs(
+        (
+          'foo-color': rgb(123, 123, 123),
+          'foo-opacity': 0.6,
+          'bar-color': rgb(0, 0, 255),
+          'bar-opacity': 0.2,
+        ),
+        (
+          color-key: 'foo-color',
+          opacity-key: 'foo-opacity',
+        ),
+        (
+          color-key: 'bar-color',
+          opacity-key: 'bar-opacity',
+        )
+      );
+
+      $want: (
+        'foo-color': rgba(123, 123, 123, 0.6),
+        'bar-color': rgba(0, 0, 255, 0.2),
+      );
+
+      @include test.assert-equal($got, $want);
+    }
+
+    @include test.it('joins keyword color and opacity pairs') {
+      $got: colors.join-color-and-opacity-pairs(
+        (
+          'foo-color': red,
+          'foo-opacity': 0.4,
+          'bar-color': black,
+          'bar-opacity': 0.3,
+        ),
+        (
+          color-key: 'foo-color',
+          opacity-key: 'foo-opacity',
+        ),
+        (
+          color-key: 'bar-color',
+          opacity-key: 'bar-opacity',
+        )
+      );
+
+      $want: (
+        'foo-color': rgba(255, 0, 0, 0.4),
+        'bar-color': rgba(0, 0, 0, 0.3),
+      );
+
+      @include test.assert-equal($got, $want);
+    }
+
+    @include test.it('supports multiple references to the same opacity key') {
+      $got: colors.join-color-and-opacity-pairs(
+        (
+          'foo-color': rgb(0, 255, 0),
+          'bar-color': #c30,
+          'opacity': 0.2,
+        ),
+        (
+          color-key: 'foo-color',
+          opacity-key: 'opacity',
+        ),
+        (
+          color-key: 'bar-color',
+          opacity-key: 'opacity',
+        )
+      );
+
+      $want: (
+        'foo-color': rgba(0, 255, 0, 0.2),
+        'bar-color': rgba(204, 51, 0, 0.2),
+      );
+
+      @include test.assert-equal($got, $want);
+    }
+
+    @include test.it(
+      'converts vars with hex fallbacks to RGB custom properties'
+    ) {
+      $got: colors.join-color-and-opacity-pairs(
+        (
+          'foo-color': var(--foo, #f00),
+          'foo-opacity': 0.2,
+        ),
+        (
+          color-key: 'foo-color',
+          opacity-key: 'foo-opacity',
+        )
+      );
+
+      $want: (
+        'foo-color': rgba(var(--foo-rgb, 255, 0, 0), 0.2),
+      );
+
+      @include test.assert-equal($got, $want);
+    }
+
+    @include test.it('ignores other keys') {
+      $got: colors.join-color-and-opacity-pairs(
+        (
+          'foo-height': 40px,
+          'foo-color': #f00,
+          'foo-opacity': 0.5,
+          'bar-color': #abcdef,
+          'bar-opacity': 0.2,
+        ),
+        (
+          color-key: 'foo-color',
+          opacity-key: 'foo-opacity',
+        )
+      );
+
+      $want: (
+        'foo-height': 40px,
+        'foo-color': rgba(255, 0, 0, 0.5),
+        'bar-color': #abcdef,
+        'bar-opacity': 0.2,
+      );
+
+      @include test.assert-equal($got, $want);
+    }
+  }
+}

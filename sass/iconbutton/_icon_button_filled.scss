@@ -1,0 +1,242 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'third_party/javascript/material/m3/sass/focusring/focus_ring_outward';
+@use 'third_party/javascript/material/m3/sass/ripple/ripple';
+@use 'third_party/javascript/material/m3/sass/internal/theme';
+@use 'third_party/javascript/material/m3/sass/internal/colors';
+
+/// The list of supported themeable tokens for this component variant.
+$supported-tokens: (
+  // go/keep-sorted start
+  'container-color',
+  'container-height',
+  'container-shape',
+  'container-width',
+  'disabled-container-color',
+  'disabled-container-opacity',
+  'disabled-icon-color',
+  'disabled-icon-opacity',
+  'focus-icon-color',
+  'hover-icon-color',
+  'hover-state-layer-color',
+  'hover-state-layer-opacity',
+  'icon-color',
+  'icon-size',
+  'pressed-icon-color',
+  'pressed-state-layer-color',
+  'pressed-state-layer-opacity',
+  'selected-container-color',
+  'toggle-selected-focus-icon-color',
+  'toggle-selected-hover-icon-color',
+  'toggle-selected-hover-state-layer-color',
+  'toggle-selected-icon-color',
+  'toggle-selected-pressed-icon-color',
+  'toggle-selected-pressed-state-layer-color',
+  'toggle-unselected-focus-icon-color',
+  'toggle-unselected-hover-icon-color',
+  'toggle-unselected-hover-state-layer-color',
+  'toggle-unselected-icon-color',
+  'toggle-unselected-pressed-icon-color',
+  'toggle-unselected-pressed-state-layer-color',
+  'unselected-container-color',
+  // go/keep-sorted end
+);
+
+/// Returns value in $map associated with $key. Throws an error for any $key
+/// not present in $supported-tokens.
+/// @see $supported-tokens
+/// @param {Map} $map - The input map.
+/// @param {String} $key - The key in the map.
+/// @return {Any} Returns the value from the map if it exists.
+/// @throw Error if the $key is not included in the $supported-tokens list.
+@function _token($map, $key) {
+  @if not list.index($supported-tokens, $key) {
+    @error 'Token "#{$key}" is not a supported token for component "icon_button_filled". Consider adding it to $supported-tokens.';
+  }
+  @return map.get($map, $key);
+}
+
+/// Returns a copy of the map only containing the supported tokens.
+/// @see $supported-tokens
+/// @param {Map} $map - The input map.
+/// @return {Map} Returns the map only with supported tokens.
+@function pick($map) {
+  $result: ();
+  @each $key, $val in $map {
+    @if list.index($supported-tokens, $key) {
+      $result: map.set($result, $key, map.get($map, $key));
+    }
+  }
+  @return $result;
+}
+
+/// Adds token values that Icon button theme API supports, but is not reflected
+/// in Carbon. We do this in order to maintain a consistent API across token
+/// versions.
+/// @param {Map} $tokens - The input map.
+/// @param {Map} $sys-color - System color palette.
+/// @return {Map} Returns the map with additional tokens.
+@function add-tokens-outside-carbon($tokens, $sys-color) {
+  @return map.merge(
+    $tokens,
+    (
+      'container-height': 40px,
+      'container-width': 40px,
+      'focus-ring-color': map.get($sys-color, 'secondary'),
+      'focus-ring-offset': 2px,
+      'touch-target-size': 48px,
+    )
+  );
+}
+
+/// Resolves tokens, transforming input into expected output.
+@function resolve-tokens($map) {
+  // Colors
+  @return colors.join-color-and-opacity-pairs(
+    $map,
+    (
+      color-key: 'disabled-icon-color',
+      opacity-key: 'disabled-icon-opacity',
+    ),
+    (
+      color-key: 'disabled-container-color',
+      opacity-key: 'disabled-container-opacity',
+    )
+  );
+}
+
+/// Emits CSS custom properties for the given input map.
+/// Be sure to call theme.create on a theme map before passing it as input.
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to emit.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin abstract-theme($theme) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @error 'Token "#{$key}" is not a supported token for component "icon_button_filled" (see $supported-tokens).';
+    }
+  }
+
+  @include theme.emit($theme);
+}
+
+/// Emits CSS selectors with property/value pairs for the given input map.
+/// Be sure to call theme.create on a theme map before passing it as input.
+/// @see {theme.create}
+/// @see $supported-tokens
+/// @param {Map} $theme - The theme map to use for CSS values.
+/// @throw Error if any keys in $theme are not included in $supported-tokens.
+@mixin abstract-styles($theme) {
+  @each $key, $val in $theme {
+    @if not list.index($supported-tokens, $key) {
+      @error 'Token "#{$key}" is not a supported token for component "icon_button_filled" (see $supported-tokens).';
+    }
+  }
+
+  &-icon-button {
+    $height: _token($theme, 'container-height');
+    $width: _token($theme, 'container-width');
+    $icon-size: _token($theme, 'icon-size');
+
+    block-size: $height;
+    inline-size: $width;
+    padding-block: calc(($height - $icon-size) / 2);
+    padding-inline: calc(($width - $icon-size) / 2);
+    background-color: _token($theme, 'container-color');
+    border-radius: _token($theme, 'container-shape');
+    color: _token($theme, 'icon-color');
+
+    // TODO(b/284465143): Remove from each icon button variant.
+    will-change: transform, opacity;
+
+    @include ripple.theme(
+      (
+        'hover-color': _token($theme, 'hover-state-layer-color'),
+        'hover-opacity': _token($theme, 'hover-state-layer-opacity'),
+        'pressed-color': _token($theme, 'pressed-state-layer-color'),
+        'pressed-opacity': _token($theme, 'pressed-state-layer-opacity'),
+        'shape': _token($theme, 'container-shape'),
+      )
+    );
+
+    @include focus_ring_outward.theme(
+      (
+        'target-shape': _token($theme, 'container-shape'),
+      )
+    );
+  }
+
+  &-icon-button--toggle {
+    background-color: _token($theme, 'unselected-container-color');
+    color: _token($theme, 'toggle-unselected-icon-color');
+
+    @include ripple.theme(
+      (
+        'hover-color':
+          _token($theme, 'toggle-unselected-hover-state-layer-color'),
+        'pressed-color':
+          _token($theme, 'toggle-unselected-pressed-state-layer-color'),
+      )
+    );
+  }
+
+  &-icon-button--on {
+    background-color: _token($theme, 'selected-container-color');
+    color: _token($theme, 'toggle-selected-icon-color');
+
+    @include ripple.theme(
+      (
+        'hover-color': _token($theme, 'toggle-selected-hover-state-layer-color'),
+        'pressed-color':
+          _token($theme, 'toggle-selected-pressed-state-layer-color'),
+      )
+    );
+  }
+
+  &-icon-button:hover {
+    color: _token($theme, 'hover-icon-color');
+  }
+  &-icon-button:focus {
+    color: _token($theme, 'focus-icon-color');
+  }
+  &-icon-button:active {
+    color: _token($theme, 'pressed-icon-color');
+  }
+
+  &-icon-button--toggle:hover {
+    color: _token($theme, 'toggle-unselected-hover-icon-color');
+  }
+  &-icon-button--toggle:focus {
+    color: _token($theme, 'toggle-unselected-focus-icon-color');
+  }
+  &-icon-button--toggle:active {
+    color: _token($theme, 'toggle-unselected-pressed-icon-color');
+  }
+
+  &-icon-button--on:hover {
+    color: _token($theme, 'toggle-selected-hover-icon-color');
+  }
+  &-icon-button--on:focus {
+    color: _token($theme, 'toggle-selected-focus-icon-color');
+  }
+  &-icon-button--on:active {
+    color: _token($theme, 'toggle-selected-pressed-icon-color');
+  }
+
+  &-icon-button:disabled {
+    background-color: _token($theme, 'disabled-container-color');
+    opacity: _token($theme, 'disabled-container-opacity');
+  }
+  &-icon-button:disabled &-icon-button__icon-slot {
+    color: _token($theme, 'disabled-icon-color');
+    opacity: _token($theme, 'disabled-icon-opacity');
+  }
+}

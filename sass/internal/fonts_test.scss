@@ -1,0 +1,60 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+@use 'third_party/javascript/node_modules/sass_true/true' as test;
+@use './fonts';
+
+@include test.describe('fonts') {
+  @include test.describe('add-fallbacks-for-google-sans-text()') {
+    @include test.it(
+      'returns the original value if it does not match "Google Sans Text"'
+    ) {
+      $got: fonts.add-fallbacks-for-google-sans-text(Roboto);
+      $want: Roboto;
+      @include test.assert-equal($got, $want);
+    }
+
+    @include test.it('returns the original value for "Google Sans"') {
+      $got: fonts.add-fallbacks-for-google-sans-text('Google Sans');
+      $want: 'Google Sans';
+      @include test.assert-equal($got, $want);
+    }
+
+    @include test.it(
+      'adds fallbacks to "Google Sans Text" but keeps GST in the result'
+    ) {
+      $got: fonts.add-fallbacks-for-google-sans-text('Google Sans Text');
+      $want: 'Google Sans Text', 'Google Sans';
+      @include test.assert-equal($got, $want);
+    }
+  }
+
+  @include test.describe('rename-google-sans-text-and-add-fallbacks()') {
+    @include test.it(
+      'returns the original value if it does not match "Google Sans Text"'
+    ) {
+      $got: fonts.rename-google-sans-text-and-add-fallbacks(Roboto);
+      $want: Roboto;
+      @include test.assert-equal($got, $want);
+    }
+
+    @include test.it('returns the original value for "Google Sans"') {
+      $got: fonts.rename-google-sans-text-and-add-fallbacks('Google Sans');
+      $want: 'Google Sans';
+      @include test.assert-equal($got, $want);
+    }
+
+    @include test.it(
+      'renames "Google Sans Text" to "Google Sans" and adds fallbacks'
+    ) {
+      $got: fonts.rename-google-sans-text-and-add-fallbacks('Google Sans Text');
+      $want: 'Google Sans', Roboto, Arial, sans-serif;
+      @include test.assert-equal($got, $want);
+    }
+  }
+}

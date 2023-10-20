@@ -1,0 +1,185 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// go/keep-sorted start
+@use './theme';
+@use 'third_party/javascript/node_modules/sass_true/true' as test;
+// go/keep-sorted end
+
+@include test.describe('theme') {
+  @include test.describe('create()') {
+    @include test.it('passes through null keys') {
+      $theme: theme.create(
+        (
+          'foo': null,
+        ),
+        'test-theme'
+      );
+      @include test.assert-equal(
+        $theme,
+        (
+          'foo': null,
+        )
+      );
+    }
+
+    @include test.it('creates custom properties for non-null keys') {
+      $theme: theme.create(
+        (
+          'foo': red,
+        ),
+        'test-theme'
+      );
+      @include test.assert-equal(
+        $theme,
+        (
+          'foo': var(--test-theme-foo, red),
+        )
+      );
+    }
+
+    @include test.it('supports nesting custom properties') {
+      $theme: theme.create(
+        (
+          'foo': var(--my-custom-theme, blue),
+        ),
+        'test-theme'
+      );
+      @include test.assert-equal(
+        $theme,
+        (
+          'foo': var(--test-theme-foo, var(--my-custom-theme, blue)),
+        )
+      );
+    }
+
+    @include test.it('supports custom properties without fallbacks') {
+      $theme: theme.create(
+        (
+          'foo': var(--my-custom-theme),
+        ),
+        'test-theme'
+      );
+      @include test.assert-equal(
+        $theme,
+        (
+          'foo': var(--test-theme-foo, var(--my-custom-theme)),
+        )
+      );
+    }
+  }
+
+  @include test.describe('emit()') {
+    @include test.it('ignores null keys') {
+      @include test.assert {
+        @include test.output {
+          @include theme.emit(
+            (
+              'foo': null,
+            )
+          );
+        }
+
+        @include test.expect {
+          // Intentionally empty.
+        }
+      }
+    }
+
+    @include test.it('produces custom properties for a created theme') {
+      @include test.assert {
+        @include test.output {
+          $theme: theme.create(
+            (
+              'foo': red,
+            ),
+            'test-theme'
+          );
+          @include theme.emit($theme);
+        }
+
+        @include test.expect {
+          --test-theme-foo: red;
+        }
+      }
+    }
+
+    @include test.it('produces custom properties for a valid theme map') {
+      @include test.assert {
+        @include test.output {
+          @include theme.emit(
+            (
+              'container-color': var(--my-custom-container-color, green),
+            )
+          );
+        }
+
+        @include test.expect {
+          --my-custom-container-color: green;
+        }
+      }
+    }
+
+    @include test.it('produces custom property chains for a valid theme') {
+      @include test.assert {
+        @include test.output {
+          $theme: theme.create(
+            theme.create(
+              (
+                'foo': red,
+              ),
+              'test-theme-inner'
+            ),
+            'test-theme-outer'
+          );
+          @include theme.emit($theme);
+        }
+
+        @include test.expect {
+          --test-theme-outer-foo: var(--test-theme-inner-foo, red);
+        }
+      }
+    }
+
+    @include test.it('produces custom properties chains for hardcoded themes') {
+      @include test.assert {
+        @include test.output {
+          $theme: theme.create(
+            (
+              'foo': var(--my-custom-theme, blue),
+            ),
+            'test-theme-outer'
+          );
+          @include theme.emit($theme);
+        }
+
+        @include test.expect {
+          --test-theme-outer-foo: var(--my-custom-theme, blue);
+        }
+      }
+    }
+
+    @include test.it('produces custom properties without fallbacks') {
+      @include test.assert {
+        @include test.output {
+          $theme: theme.create(
+            (
+              'foo': var(--my-custom-theme),
+            ),
+            'test-theme-outer'
+          );
+          @include theme.emit($theme);
+        }
+
+        @include test.expect {
+          --test-theme-outer-foo: var(--my-custom-theme);
+        }
+      }
+    }
+  }
+}

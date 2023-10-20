@@ -1,0 +1,132 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// go/keep-sorted start
+@use 'sass:meta';
+@use 'sass:string';
+// go/keep-sorted end
+
+/// Returns the custom property variable name of `var()` string.
+///
+/// @throw If the value is not a custom property.
+/// @param {String} $var - A custom property `var()` string.
+/// @return {String|null} The custom property variable name or null if the input
+///   is not a custom property.
+@function name($var) {
+  @if not _has-prefix($var, 'var(') or not _has-suffix($var, ')') {
+    @return null;
+  }
+
+  $var: _trim-var($var);
+  $name: _trim-space($var);
+  $comma: string.index($var, ',');
+  @if $comma {
+    @return _trim-space(string.slice($var, 1, $comma - 1));
+  }
+  @return $name;
+}
+
+/// Returns the fallback value of a custom property `var()` string. The value
+/// may be null if the `var()` does not have a fallback value.
+///
+/// @example - scss
+///   $fallback: var-fallback(var(--foo, var(--bar, 8px));
+///   // "var(--bar, 8px)"
+///
+/// @throw If the value is not a custom property.
+/// @param {String} $var - A custom property `var()` string.
+/// @return {String|null} The fallback value of the `var()` string. May be null if
+///     the `var()` does not have a fallback value.
+@function fallback($var) {
+  $var: _trim-var($var);
+  $comma: string.index($var, ',');
+  @if $comma {
+    @return _trim-space(string.slice($var, $comma + 1));
+  }
+  @return null;
+}
+
+/// Indicates whether or not a value is a custom property `var()` string.
+///
+/// @example - scss
+///   $is-var: is-var('var(--foo)'); // true
+///
+/// @param {*} $var - The value to test.
+/// @return {Bool} True if the value is a custom property `var()` string, or
+///     false if not.
+@function is-var($var) {
+  @if meta.type-of($var) != 'string' {
+    @return false;
+  }
+  $varname: name($var);
+  @if meta.type-of($varname) != 'string' {
+    @return false;
+  }
+  @return _has-prefix($varname, '--');
+}
+
+/// Checks if a string starts with a given prefix.
+///
+/// @example - scss
+///   @debug _has-prefix('var(--foo)', 'var('); // true
+///
+/// @param {String} $string - The string to test.
+/// @param {String} $prefix - The prefix to check.
+/// @return {Boolean} True if the string starts with the given prefix.
+@function _has-prefix($string, $prefix) {
+  @return string.slice($string, 1, string.length($prefix)) == $prefix;
+}
+
+/// Checks if a string ends with a given suffix.
+///
+/// @example - scss
+///   @debug _has-suffix('var(--foo)', ')'); // true
+///
+/// @param {String} $string - The string to test.
+/// @param {String} $suffix - The suffix to check.
+/// @return {Boolean} True if the string ends with the given suffix.
+@function _has-suffix($string, $suffix) {
+  @return string.slice($string, -1 * string.length($suffix)) == $suffix;
+}
+
+/// Trims the "var" function from a string.
+///
+/// @example - scss
+///   @debug _trim-var('var(--foo)'); // "--foo"
+///
+/// @param {String} $string - The string to trim.
+/// @return {String} The string with the "var" function trimmed.
+@function _trim-var($string) {
+  $open: 'var(';
+  @if _has-prefix($string, $open) {
+    $string: string.slice($string, string.length($open) + 1);
+  }
+  $close: ')';
+  @if _has-suffix($string, $close) {
+    $string: string.slice($string, 1, -1 * string.length($close) - 1);
+  }
+  @return $string;
+}
+
+/// Trims leading and trailing white space from a string.
+///
+/// @example - scss
+///   @debug _trim-space('   cats     '); // "cats"
+///
+/// @param {String} $string - The string to trim.
+/// @return {String} The string with all white space trimmed.
+@function _trim-space($string) {
+  $space: ' ';
+  @while _has-prefix($string, $space) {
+    $string: string.slice($string, string.length($space) + 1);
+  }
+  @while _has-suffix($string, $space) {
+    $string: string.slice($string, 1, -1 * string.length($space) - 1);
+  }
+  @return $string;
+}

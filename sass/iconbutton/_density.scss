@@ -1,0 +1,34 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+@use 'sass:list';
+
+/// Creates a density scale $theme for icon button.
+///
+/// @param {Number} $scale - Density scale value for component.
+/// Supported density scale values `-4`, `-3`, `-2`, `-1`, `0`.
+/// @param {Number} $default-container-size - Default size for the
+/// component.
+/// @param {Number} $default-icon-size - Default icon size for the
+/// component.
+/// @return {Map} $theme
+///
+@function scale($scale, $default-container-size, $default-icon-size) {
+  $supported-densities: (-4, -3, -2, -1, 0);
+
+  @if list.index($supported-densities, $scale) == null {
+    @error "Unsupported value for $scale: #{$scale}, available values are: #{$supported-densities}";
+  }
+
+  // The icon is roughly half the size of the container.
+  // To keep a similar proportion between it and its container it is changed only by 2px instead of 4px.
+  @return (
+    'container-size': $default-container-size + $scale * 4px,
+    'icon-size': $default-icon-size + $scale * 2px
+  );
+}

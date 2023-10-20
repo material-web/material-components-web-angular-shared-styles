@@ -1,0 +1,28 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/// Backwards compatible with components using Northstar typography resolver
+/// located in google3/javascript/material/gm3/sass/_typography.scss
+@function add-fallbacks-for-google-sans-text($font) {
+  @if $font == 'Google Sans Text' {
+    // TODO(b/257347445): change to 'Google Sans' once variable font fixed
+    // Support variable 'Google Sans' font
+    @return 'Google Sans Text', 'Google Sans';
+  }
+  @return $font;
+}
+
+/// Backwards compatible with components using the old Sass migration utilities
+/// located in google3/javascript/materialdesign/tokens/migration.
+@function rename-google-sans-text-and-add-fallbacks($font) {
+  // TODO(b/257347445): Remove in favor of the compiler handling this.
+  @if $font == 'Google Sans Text' {
+    @return 'Google Sans', Roboto, Arial, sans-serif;
+  }
+  @return $font;
+}

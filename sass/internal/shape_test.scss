@@ -1,0 +1,230 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// go/keep-sorted start
+@use './shape';
+@use 'third_party/javascript/node_modules/sass_true/true' as test;
+// go/keep-sorted end
+
+@include test.describe('shape') {
+  @include test.describe('merge-logical-border-radius()') {
+    @include test.it(
+      'does not change the given map the if shape key does not exist'
+    ) {
+      $theme: shape.merge-logical-border-radius(
+        (
+          'foo': null,
+        ),
+        'shape'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'foo': null,
+        )
+      );
+    }
+
+    @include test.it('expands single value into logical border radii') {
+      $theme: shape.merge-logical-border-radius(
+        (
+          'shape': 4px,
+        ),
+        'shape'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'shape': 4px,
+          'shape-start-start': 4px,
+          'shape-start-end': 4px,
+          'shape-end-end': 4px,
+          'shape-end-start': 4px,
+        )
+      );
+    }
+
+    @include test.it('expands single value lists into logical border radii') {
+      $theme: shape.merge-logical-border-radius(
+        (
+          'shape': (
+            4px,
+          ),
+        ),
+        'shape'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'shape': (
+            4px,
+          ),
+          'shape-start-start': 4px,
+          'shape-start-end': 4px,
+          'shape-end-end': 4px,
+          'shape-end-start': 4px,
+        )
+      );
+    }
+
+    @include test.it('expands two value lists into logical border radii') {
+      $theme: shape.merge-logical-border-radius(
+        (
+          'shape': (
+            4px,
+            8px,
+          ),
+        ),
+        'shape'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'shape': (
+            4px,
+            8px,
+          ),
+          'shape-start-start': 4px,
+          'shape-start-end': 8px,
+          'shape-end-end': 4px,
+          'shape-end-start': 8px,
+        )
+      );
+    }
+
+    @include test.it('expands three value lists into logical border radii') {
+      $theme: shape.merge-logical-border-radius(
+        (
+          'shape': (
+            4px,
+            8px,
+            12px,
+          ),
+        ),
+        'shape'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'shape': (
+            4px,
+            8px,
+            12px,
+          ),
+          'shape-start-start': 4px,
+          'shape-start-end': 8px,
+          'shape-end-end': 12px,
+          'shape-end-start': 8px,
+        )
+      );
+    }
+
+    @include test.it('expands four value lists into logical border radii') {
+      $theme: shape.merge-logical-border-radius(
+        (
+          'shape': (
+            1px,
+            2px,
+            3px,
+            4px,
+          ),
+        ),
+        'shape'
+      );
+
+      @include test.assert-equal(
+        $theme,
+        (
+          'shape': (
+            1px,
+            2px,
+            3px,
+            4px,
+          ),
+          'shape-start-start': 1px,
+          'shape-start-end': 2px,
+          'shape-end-end': 3px,
+          'shape-end-start': 4px,
+        )
+      );
+    }
+  }
+
+  @include test.it(
+    'expands >4 value lists into logical border radii, ignoring extra values'
+  ) {
+    $theme: shape.merge-logical-border-radius(
+      (
+        'shape': (
+          1px,
+          2px,
+          3px,
+          4px,
+          5px,
+          6px,
+        ),
+      ),
+      'shape'
+    );
+
+    @include test.assert-equal(
+      $theme,
+      (
+        'shape': (
+          1px,
+          2px,
+          3px,
+          4px,
+          5px,
+          6px,
+        ),
+        'shape-start-start': 1px,
+        'shape-start-end': 2px,
+        'shape-end-end': 3px,
+        'shape-end-start': 4px,
+      )
+    );
+  }
+
+  @include test.describe('is-logical-border-property') {
+    @include test.it('returns true for start-start') {
+      @include test.assert-true(
+        shape.is-logical-border-property('shape-start-start')
+      );
+    }
+
+    @include test.it('returns true for start-end') {
+      @include test.assert-true(
+        shape.is-logical-border-property('shape-start-end')
+      );
+    }
+
+    @include test.it('returns true for end-end') {
+      @include test.assert-true(
+        shape.is-logical-border-property('shape-end-end')
+      );
+    }
+
+    @include test.it('returns true for end-start') {
+      @include test.assert-true(
+        shape.is-logical-border-property('shape-end-start')
+      );
+    }
+
+    @include test.it('returns false for non-matches') {
+      @include test.assert-false(
+        shape.is-logical-border-property('shape-things')
+      );
+    }
+  }
+}
