@@ -1,13 +1,13 @@
 {
   "name": "@material/material-components-web-angular-shared-styles",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Styles shared between Material Web and Angular Material",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/material-web/material-components-web-angular-shared-styles.git"
+    "url": "https://github.com/material-components/material-components-web"
   },
   "publishConfig": {
     "registry": "https://wombat-dressing-room.appspot.com"
