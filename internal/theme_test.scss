@@ -74,6 +74,24 @@
     }
   }
 
+  @include test.describe('create-without-fallbacks()') {
+    @include test.it('creates a map of custom properties') {
+      $theme: theme.create-without-fallbacks(('foo', 'bar'), 'test-theme');
+      @include test.assert-equal(
+        $theme,
+        (
+          'foo': var(--test-theme-foo),
+          'bar': var(--test-theme-bar),
+        )
+      );
+    }
+
+    @include test.it('returns an empty map given an empty list') {
+      $theme: theme.create-without-fallbacks((), 'test-theme');
+      @include test.assert-equal($theme, ());
+    }
+  }
+
   @include test.describe('emit()') {
     @include test.it('ignores null keys') {
       @include test.assert {

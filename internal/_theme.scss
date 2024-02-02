@@ -44,7 +44,7 @@
   @return $theme;
 }
 
-/// Transform a user-provided `$theme` map's values into `var()` custom property
+/// Transform a user-provided list of `$keys` into `var()` custom property
 /// values without fallback styles.
 ///
 /// Use this function in `theme-styles()` mixins to transform values into
@@ -52,8 +52,8 @@
 /// `theme.emit()` in the `theme()` mixin by the user.
 ///
 /// @example - scss
-///   $theme: theme.create((
-///     'label-color': purple
+///   $theme: theme.create-without-fallbacks((
+///     'label-color',
 ///   ), 'my-button');
 ///
 ///
@@ -62,17 +62,16 @@
 ///     'label-color': var(--my-button-label-color),
 ///   );
 ///
-/// @param {Map} $theme - The theme Map to transform values into custom property
+/// @param {List} $keys - The keys to transform values into custom property
 ///     `var()`s.
 /// @param {String} $prefix - Component and variant prefix to prepend for each
 ///     token's custom property name.
 /// @return {Map} The provided `$theme` Map whose values are replaced with the
 ///     `var()` custom properties.
-@function create-without-fallbacks($theme, $prefix) {
-  @each $key, $value in $theme {
-    @if $value != null {
-      $theme: map.set($theme, $key, var(--#{$prefix}-#{$key}));
-    }
+@function create-without-fallbacks($keys, $prefix) {
+  $theme: ();
+  @each $key in $keys {
+    $theme: map.set($theme, $key, var(--#{$prefix}-#{$key}));
   }
   @return $theme;
 }

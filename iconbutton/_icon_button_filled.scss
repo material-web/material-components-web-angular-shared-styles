@@ -8,10 +8,10 @@
 
 @use 'sass:list';
 @use 'sass:map';
-@use 'third_party/javascript/material/m3/sass/focusring/focus_ring_outward';
-@use 'third_party/javascript/material/m3/sass/ripple/ripple';
-@use 'third_party/javascript/material/m3/sass/internal/theme';
-@use 'third_party/javascript/material/m3/sass/internal/colors';
+@use '../focusring/focus_ring_outward';
+@use '../ripple/ripple';
+@use '../internal/theme';
+@use '../internal/colors';
 
 /// The list of supported themeable tokens for this component variant.
 $supported-tokens: (
@@ -68,7 +68,7 @@ $supported-tokens: (
 /// @see $supported-tokens
 /// @param {Map} $map - The input map.
 /// @return {Map} Returns the map only with supported tokens.
-@function pick($map) {
+@function pick-supported-tokens($map) {
   $result: ();
   @each $key, $val in $map {
     @if list.index($supported-tokens, $key) {
