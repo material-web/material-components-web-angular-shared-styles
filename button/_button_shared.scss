@@ -8,11 +8,11 @@
 
 @use 'sass:list';
 @use 'sass:map';
-@use 'third_party/javascript/material/m3/sass/internal/theme';
-@use 'third_party/javascript/material/m3/sass/internal/colors';
-@use 'third_party/javascript/material/m3/sass/internal/fonts';
-@use 'third_party/javascript/material/m3/sass/focusring/focus_ring_outward';
-@use 'third_party/javascript/material/m3/sass/ripple/ripple';
+@use '../internal/theme';
+@use '../internal/colors';
+@use '../internal/fonts';
+@use '../focusring/focus_ring_outward';
+@use '../ripple/ripple';
 
 /// The list of supported themeable tokens for this component variant.
 $supported-tokens: (
@@ -32,9 +32,11 @@ $supported-tokens: (
   'label-text-size',
   'label-text-tracking',
   'label-text-weight',
+  'leading-space',
   'pressed-label-text-color',
   'pressed-state-layer-color',
   'pressed-state-layer-opacity',
+  'trailing-space',
   'with-icon-disabled-icon-color',
   'with-icon-disabled-icon-opacity',
   'with-icon-focus-icon-color',
@@ -63,7 +65,7 @@ $supported-tokens: (
 /// @see $supported-tokens
 /// @param {Map} $map - The input map.
 /// @return {Map} Returns the map only with supported tokens.
-@function pick($map) {
+@function pick-supported-tokens($map) {
   $result: ();
   @each $key, $val in $map {
     @if list.index($supported-tokens, $key) {
@@ -85,6 +87,8 @@ $supported-tokens: (
     (
       'focus-ring-color': map.get($sys-color, 'secondary'),
       'focus-ring-offset': 2px,
+      'leading-space': 24px,
+      'trailing-space': 24px,
     )
   );
 }
@@ -157,7 +161,8 @@ $supported-tokens: (
     vertical-align: middle;
     cursor: pointer;
     min-inline-size: 64px;
-    padding-inline: 24px;
+    padding-inline-start: _token($theme, 'leading-space');
+    padding-inline-end: _token($theme, 'trailing-space');
     block-size: _token($theme, 'container-height');
     border-radius: _token($theme, 'container-shape');
 
@@ -301,7 +306,6 @@ $supported-tokens: (
   &-button__touch {
     position: absolute;
     inset: 50% 0 0;
-    opacity: 0;
     transform: translateY(-50%);
     inline-size: max(48px, 100%);
     block-size: max(48px, 100%);

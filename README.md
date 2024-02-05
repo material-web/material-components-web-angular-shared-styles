@@ -1,1 +1,3 @@
-# material-components-web-angular-shared-styles
+# Sass
+
+Shared styles for Angular Material components.

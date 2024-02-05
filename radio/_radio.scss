@@ -11,10 +11,10 @@
 
 @use 'sass:list';
 @use 'sass:map';
-@use 'third_party/javascript/material/m3/sass/focusring/focus_ring_outward';
-@use 'third_party/javascript/material/m3/sass/ripple/ripple';
-@use 'third_party/javascript/material/m3/sass/internal/theme';
-@use 'third_party/javascript/material/m3/sass/internal/colors';
+@use '../focusring/focus_ring_outward';
+@use '../ripple/ripple';
+@use '../internal/theme';
+@use '../internal/colors';
 
 /// The list of supported themeable tokens for this component.
 $supported-tokens: (
@@ -64,7 +64,7 @@ $supported-tokens: (
 /// @see $supported-tokens
 /// @param {Map} $map - The input map.
 /// @return {Map} Returns the map only with supported tokens.
-@function pick($map) {
+@function pick-supported-tokens($map) {
   $result: ();
   @each $key, $val in $map {
     @if list.index($supported-tokens, $key) {
@@ -420,7 +420,7 @@ $supported-tokens: (
   // TODO(b/246297033): Remove these hacks when GM3 Formfield is ready to use.
   &-radio__form-field {
     color: map.get($form-field-override-values, 'on-surface');
-    font-family: Roboto, Arial, sans-serif;
+    font-family: map.get($form-field-override-values, 'body-large-font');
     font-size: map.get($form-field-override-values, 'body-large-size');
     font-weight: 400;
     letter-spacing: 0.2px;

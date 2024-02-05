@@ -11,7 +11,11 @@
   &-button {
     // TODO(b/281909437): Remove from each button variant.
     will-change: transform, opacity;
-    padding-inline: 12px;
+    // Specify both inline-start and inline-end padding alignments to provide a
+    // workaround to Safari issue where the -webkit- conversion resulted in no
+    // padding being applied.
+    padding-inline-start: 12px;
+    padding-inline-end: 12px;
   }
 
   &-button:before {
@@ -27,8 +31,7 @@
     }
   }
 
-  // TODO(b/281910425): Replace the selector below with '&-button--icon-leading'.
-  &-padding-applied#{&}-button--icon-leading {
+  &-button--icon-leading {
     padding-inline-end: 16px;
   }
   &-button--icon-leading &-button__icon-slot i,
@@ -37,8 +40,7 @@
     margin-inline-end: 8px;
   }
 
-  // TODO(b/281910425): Replace the selector below with '&-button--icon-trailing'.
-  &-padding-applied#{&}-button--icon-trailing {
+  &-button--icon-trailing {
     padding-inline-start: 16px;
   }
   &-button--icon-trailing &-button__icon-slot i,

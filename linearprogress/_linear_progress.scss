@@ -8,7 +8,7 @@
 
 @use 'sass:list';
 @use 'sass:map';
-@use 'third_party/javascript/material/m3/sass/internal/theme';
+@use '../internal/theme';
 
 /// The list of supported themeable tokens for this component.
 $supported-tokens: (
@@ -39,7 +39,7 @@ $supported-tokens: (
 /// @see $supported-tokens
 /// @param {Map} $map - The input map.
 /// @return {Map} Returns the map only with supported tokens.
-@function pick($map) {
+@function pick-supported-tokens($map) {
   $result: ();
   @each $key, $val in $map {
     @if list.index($supported-tokens, $key) {
@@ -106,10 +106,16 @@ $supported-tokens: (
     margin: auto 0; // Vertically center
     width: 100%;
     animation: none;
+    /*rtl:ignore*/
     transform-origin: top left;
     height: _token($theme, 'active-indicator-height');
 
     transition: transform 250ms 0ms cubic-bezier(0.4, 0, 0.6, 1);
+  }
+  [dir='rtl'] &-linear-progress__bar:not([dir='ltr']),
+  &-linear-progress__bar[dir='rtl']:not([dir='ltr']) {
+    /*rtl:ignore*/
+    transform-origin: center right;
   }
 
   &-linear-progress__bar-inner {
@@ -136,9 +142,10 @@ $supported-tokens: (
   }
 
   &-linear-progress__buffer-dots {
+    $sign: var(--flow-direction, 1);
     background-repeat: repeat-x;
     flex: auto;
-    transform: rotate(180deg);
+    transform: rotate(calc(180deg * $sign));
     background-color: _token($theme, 'track-color');
     // SVG is optimized for data URI (https://codepen.io/tigt/post/optimizing-svgs-in-data-uris)
     $svg: "data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' enable-background='new 0 0 5 2' xml:space='preserve' viewBox='0 0 5 2' preserveAspectRatio='xMinYMin slice'%3E%3Ccircle cx='1' cy='1' r='1'/%3E%3C/svg%3E";
@@ -156,8 +163,8 @@ $supported-tokens: (
         // Normally the buffer dots start from the left and overflow to the right.
         // We rotate by 180deg so that the buffer dots start on the right when
         // in non-reversed mode and overflow to the left.
-        transform: rotate(180deg)
-          translateX(calc(_token($theme, 'track-height') * -2.5));
+        transform: rotate(calc(180deg * $sign))
+          translateX(calc(_token($theme, 'track-height') * -2.5 * $sign));
       }
     }
   }

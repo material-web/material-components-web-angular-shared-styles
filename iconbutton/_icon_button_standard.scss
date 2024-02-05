@@ -8,41 +8,36 @@
 
 @use 'sass:list';
 @use 'sass:map';
-@use 'third_party/javascript/material/m3/sass/focusring/focus_ring_outward';
-@use 'third_party/javascript/material/m3/sass/ripple/ripple';
-@use 'third_party/javascript/material/m3/sass/internal/theme';
-@use 'third_party/javascript/material/m3/sass/internal/colors';
+@use '../focusring/focus_ring_outward';
+@use '../ripple/ripple';
+@use '../internal/theme';
+@use '../internal/colors';
 
 /// The list of supported themeable tokens for this component variant.
 $supported-tokens: (
   // go/keep-sorted start
-  'container-height',
-  'container-shape',
-  'container-width',
   'disabled-icon-color',
   'disabled-icon-opacity',
-  'disabled-selected-container-color',
-  'disabled-selected-container-opacity',
-  'disabled-unselected-outline-color',
-  'disabled-unselected-outline-opacity',
-  'hover-state-layer-opacity',
   'icon-size',
-  'pressed-state-layer-opacity',
-  'selected-container-color',
   'selected-focus-icon-color',
   'selected-hover-icon-color',
   'selected-hover-state-layer-color',
+  'selected-hover-state-layer-opacity',
   'selected-icon-color',
   'selected-pressed-icon-color',
   'selected-pressed-state-layer-color',
+  'selected-pressed-state-layer-opacity',
+  'state-layer-height',
+  'state-layer-shape',
+  'state-layer-width',
   'unselected-focus-icon-color',
   'unselected-hover-icon-color',
   'unselected-hover-state-layer-color',
+  'unselected-hover-state-layer-opacity',
   'unselected-icon-color',
-  'unselected-outline-color',
-  'unselected-outline-width',
   'unselected-pressed-icon-color',
   'unselected-pressed-state-layer-color',
+  'unselected-pressed-state-layer-opacity',
   // go/keep-sorted end
 );
 
@@ -55,7 +50,7 @@ $supported-tokens: (
 /// @throw Error if the $key is not included in the $supported-tokens list.
 @function _token($map, $key) {
   @if not list.index($supported-tokens, $key) {
-    @error 'Token "#{$key}" is not a supported token for component "icon_button_outlined". Consider adding it to $supported-tokens.';
+    @error 'Token "#{$key}" is not a supported token for component "icon_button_standard". Consider adding it to $supported-tokens.';
   }
   @return map.get($map, $key);
 }
@@ -64,7 +59,7 @@ $supported-tokens: (
 /// @see $supported-tokens
 /// @param {Map} $map - The input map.
 /// @return {Map} Returns the map only with supported tokens.
-@function pick($map) {
+@function pick-supported-tokens($map) {
   $result: ();
   @each $key, $val in $map {
     @if list.index($supported-tokens, $key) {
@@ -84,8 +79,8 @@ $supported-tokens: (
   @return map.merge(
     $tokens,
     (
-      'container-height': 40px,
-      'container-width': 40px,
+      'state-layer-height': 40px,
+      'state-layer-width': 40px,
       'focus-ring-color': map.get($sys-color, 'secondary'),
       'focus-ring-offset': 2px,
       'touch-target-size': 48px,
@@ -101,14 +96,6 @@ $supported-tokens: (
     (
       color-key: 'disabled-icon-color',
       opacity-key: 'disabled-icon-opacity',
-    ),
-    (
-      color-key: 'disabled-unselected-outline-color',
-      opacity-key: 'disabled-unselected-outline-opacity',
-    ),
-    (
-      color-key: 'disabled-selected-container-color',
-      opacity-key: 'disabled-selected-container-opacity',
     )
   );
 }
@@ -121,7 +108,7 @@ $supported-tokens: (
 @mixin abstract-theme($theme) {
   @each $key, $val in $theme {
     @if not list.index($supported-tokens, $key) {
-      @error 'Token "#{$key}" is not a supported token for component "icon_button_outlined" (see $supported-tokens).';
+      @error 'Token "#{$key}" is not a supported token for component "icon_button_standard" (see $supported-tokens).';
     }
   }
 
@@ -137,53 +124,53 @@ $supported-tokens: (
 @mixin abstract-styles($theme) {
   @each $key, $val in $theme {
     @if not list.index($supported-tokens, $key) {
-      @error 'Token "#{$key}" is not a supported token for component "icon_button_outlined" (see $supported-tokens).';
+      @error 'Token "#{$key}" is not a supported token for component "icon_button_standard" (see $supported-tokens).';
     }
   }
 
   &-icon-button {
-    $height: _token($theme, 'container-height');
-    $width: _token($theme, 'container-width');
+    $height: _token($theme, 'state-layer-height');
+    $width: _token($theme, 'state-layer-width');
     $icon-size: _token($theme, 'icon-size');
 
     block-size: $height;
     inline-size: $width;
     padding-block: calc(($height - $icon-size) / 2);
     padding-inline: calc(($width - $icon-size) / 2);
-    border-radius: _token($theme, 'container-shape');
+    border-radius: _token($theme, 'state-layer-shape');
     color: _token($theme, 'unselected-icon-color');
+
+    // TODO(b/284465143): Remove from each icon button variant.
+    will-change: transform, opacity;
 
     @include ripple.theme(
       (
         'hover-color': _token($theme, 'unselected-hover-state-layer-color'),
-        'hover-opacity': _token($theme, 'hover-state-layer-opacity'),
+        'hover-opacity': _token($theme, 'unselected-hover-state-layer-opacity'),
         'pressed-color': _token($theme, 'unselected-pressed-state-layer-color'),
-        'pressed-opacity': _token($theme, 'pressed-state-layer-opacity'),
-        'shape': _token($theme, 'container-shape'),
+        'pressed-opacity':
+          _token($theme, 'unselected-pressed-state-layer-opacity'),
+        'shape': _token($theme, 'state-layer-shape'),
       )
     );
-
     @include focus_ring_outward.theme(
       (
-        'target-shape': _token($theme, 'container-shape'),
+        'target-shape': _token($theme, 'state-layer-shape'),
       )
     );
   }
-
   &-icon-button--on {
-    background-color: _token($theme, 'selected-container-color');
     color: _token($theme, 'selected-icon-color');
 
     @include ripple.theme(
       (
         'hover-color': _token($theme, 'selected-hover-state-layer-color'),
+        'hover-opacity': _token($theme, 'selected-hover-state-layer-opacity'),
         'pressed-color': _token($theme, 'selected-pressed-state-layer-color'),
+        'pressed-opacity':
+          _token($theme, 'selected-pressed-state-layer-opacity'),
       )
     );
-  }
-  &-icon-button--on:disabled {
-    background-color: _token($theme, 'disabled-selected-container-color');
-    opacity: _token($theme, 'disabled-selected-container-opacity');
   }
 
   &-icon-button:hover {
@@ -209,25 +196,5 @@ $supported-tokens: (
   &-icon-button:disabled {
     color: _token($theme, 'disabled-icon-color');
     opacity: _token($theme, 'disabled-icon-opacity');
-  }
-
-  &-icon-button::before {
-    border-radius: inherit;
-    border-style: solid;
-    box-sizing: border-box;
-    content: '';
-    inset: 0;
-    pointer-events: none;
-    position: absolute;
-    z-index: 1;
-    border-color: _token($theme, 'unselected-outline-color');
-    border-width: _token($theme, 'unselected-outline-width');
-  }
-  &-icon-button--on::before {
-    border-width: 0;
-  }
-  &-icon-button:disabled::before {
-    border-color: _token($theme, 'disabled-unselected-outline-color');
-    opacity: _token($theme, 'disabled-unselected-outline-opacity');
   }
 }
