@@ -20,7 +20,7 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://wombat-dressing-room.appspot.com/'
       - run: |
-          npm version major
+          npm version major --no-git-tag-version
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
