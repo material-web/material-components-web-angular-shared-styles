@@ -16,7 +16,6 @@
 @use '../internal/theme';
 @use '../internal/vars';
 @use '../internal/colors';
-@use 'third_party/javascript/material_components_web/theme/theme-color';
 
 /// The list of supported themeable tokens for this component variant.
 $supported-tokens: (
