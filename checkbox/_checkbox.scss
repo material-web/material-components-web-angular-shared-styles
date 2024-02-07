@@ -258,14 +258,11 @@ $supported-tokens: (
   }
 
   &-checkbox__checkmark {
-    bottom: 0;
+    inset: 0;
     box-sizing: border-box;
-    left: 0;
     opacity: 1;
     padding: 7%;
     position: absolute;
-    right: 0;
-    top: 0;
     width: 100%;
   }
   &-checkbox__native-control[aria-checked='mixed']
