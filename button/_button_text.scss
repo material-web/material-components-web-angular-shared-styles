@@ -11,11 +11,6 @@
   &-button {
     // TODO(b/281909437): Remove from each button variant.
     will-change: transform, opacity;
-    // Specify both inline-start and inline-end padding alignments to provide a
-    // workaround to Safari issue where the -webkit- conversion resulted in no
-    // padding being applied.
-    padding-inline-start: 12px;
-    padding-inline-end: 12px;
   }
 
   &-button:before {
@@ -29,23 +24,5 @@
     @media screen and (forced-colors: active) {
       border-color: CanvasText;
     }
-  }
-
-  &-button--icon-leading {
-    padding-inline-end: 16px;
-  }
-  &-button--icon-leading &-button__icon-slot i,
-  &-button--icon-leading &-button__icon-slot img,
-  &-button--icon-leading &-button__icon-slot svg {
-    margin-inline-end: 8px;
-  }
-
-  &-button--icon-trailing {
-    padding-inline-start: 16px;
-  }
-  &-button--icon-trailing &-button__icon-slot i,
-  &-button--icon-trailing &-button__icon-slot img,
-  &-button--icon-trailing &-button__icon-slot svg {
-    margin-inline-start: 8px;
   }
 }

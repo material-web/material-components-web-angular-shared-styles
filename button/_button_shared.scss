@@ -42,8 +42,13 @@ $supported-tokens: (
   'with-icon-focus-icon-color',
   'with-icon-hover-icon-color',
   'with-icon-icon-color',
+  'with-icon-icon-label-space',
   'with-icon-icon-size',
   'with-icon-pressed-icon-color',
+  'with-leading-icon-leading-space',
+  'with-leading-icon-trailing-space',
+  'with-trailing-icon-leading-space',
+  'with-trailing-icon-trailing-space',
   // go/keep-sorted end
 );
 
@@ -80,15 +85,41 @@ $supported-tokens: (
 /// versions.
 /// @param {Map} $theme - The input map.
 /// @param {Map} $sys-color - System color palette.
+/// @param {String} $variant - The variant of the component.
 /// @return {Map} Returns the map with additional tokens.
-@function add-tokens-outside-carbon($theme, $sys-color) {
-  @return map.merge(
+@function add-tokens-outside-carbon($theme, $sys-color, $variant: 'n/a') {
+  $theme: map.merge(
     $theme,
     (
       'focus-ring-color': map.get($sys-color, 'secondary'),
       'focus-ring-offset': 2px,
+      'with-icon-icon-label-space': 8px,
+    )
+  );
+
+  @if $variant == 'text' {
+    @return map.merge(
+      $theme,
+      (
+        'leading-space': 12px,
+        'trailing-space': 12px,
+        'with-leading-icon-leading-space': 12px,
+        'with-leading-icon-trailing-space': 16px,
+        'with-trailing-icon-leading-space': 16px,
+        'with-trailing-icon-trailing-space': 12px,
+      )
+    );
+  }
+
+  @return map.merge(
+    $theme,
+    (
       'leading-space': 24px,
       'trailing-space': 24px,
+      'with-leading-icon-leading-space': 16px,
+      'with-leading-icon-trailing-space': 24px,
+      'with-trailing-icon-leading-space': 24px,
+      'with-trailing-icon-trailing-space': 16px,
     )
   );
 }
@@ -246,6 +277,21 @@ $supported-tokens: (
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+  }
+
+  &-button--icon-leading {
+    padding-inline-start: _token($theme, 'with-leading-icon-leading-space');
+    padding-inline-end: _token($theme, 'with-leading-icon-trailing-space');
+  }
+  &-button--icon-leading &-button__icon-slot :is(i, img, svg) {
+    margin-inline-end: _token($theme, 'with-icon-icon-label-space');
+  }
+  &-button--icon-trailing {
+    padding-inline-start: _token($theme, 'with-trailing-icon-leading-space');
+    padding-inline-end: _token($theme, 'with-trailing-icon-trailing-space');
+  }
+  &-button--icon-trailing &-button__icon-slot :is(i, img, svg) {
+    margin-inline-start: _token($theme, 'with-icon-icon-label-space');
   }
 
   &-button__icon-slot {

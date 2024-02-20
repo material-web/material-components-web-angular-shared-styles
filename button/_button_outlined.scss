@@ -23,9 +23,6 @@ $supported-tokens: (
   'outline-color',
   'outline-width',
   'pressed-outline-color',
-  'with-icon-icon-label-space',
-  'with-leading-icon-leading-space',
-  'with-trailing-icon-trailing-space',
   // go/keep-sorted end
 );
 
@@ -55,23 +52,6 @@ $supported-tokens: (
     }
   }
   @return $result;
-}
-
-/// Adds token values that Button theme API supports, but is not reflected
-/// in Carbon. We do this in order to maintain a consistent API across token
-/// versions.
-/// @param {Map} $theme - The input map.
-/// @param {Map} $sys-color - System color palette.
-/// @return {Map} Returns the map with additional tokens.
-@function add-tokens-outside-carbon($theme) {
-  @return map.merge(
-    $theme,
-    (
-      'with-icon-icon-label-space': 8px,
-      'with-leading-icon-leading-space': 16px,
-      'with-trailing-icon-trailing-space': 16px,
-    )
-  );
 }
 
 /// Resolve tokens, transforming input into expected output.
@@ -146,19 +126,5 @@ $supported-tokens: (
   &-button__touch {
     inline-size: max(48px, 100% + (_token($theme, 'outline-width') * 2));
     inset: 50% calc(_token($theme, 'outline-width') * -1) 0;
-  }
-
-  &-button--icon-leading {
-    padding-inline-start: _token($theme, 'with-leading-icon-leading-space');
-  }
-  &-button--icon-leading &-button__icon-slot :is(i, img, svg) {
-    margin-inline-end: _token($theme, 'with-icon-icon-label-space');
-  }
-
-  &-button--icon-trailing {
-    padding-inline-end: _token($theme, 'with-trailing-icon-trailing-space');
-  }
-  &-button--icon-trailing &-button__icon-slot :is(i, img, svg) {
-    margin-inline-start: _token($theme, 'with-icon-icon-label-space');
   }
 }
