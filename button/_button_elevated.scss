@@ -110,6 +110,8 @@ $supported-tokens: (
   }
 
   &-button {
+    outline: 1px solid transparent;
+    outline-offset: -1px;
     // TODO(b/281909437): Remove from each button variant.
     will-change: transform, opacity;
     background-color: _token($theme, 'container-color');
@@ -152,18 +154,5 @@ $supported-tokens: (
         'level': 0,
       )
     );
-  }
-
-  &-button:before {
-    content: '';
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    border: 1px solid transparent;
-    // TODO(b/282060456): Remove from each button variant.
-    @media screen and (forced-colors: active) {
-      border-color: CanvasText;
-    }
   }
 }
