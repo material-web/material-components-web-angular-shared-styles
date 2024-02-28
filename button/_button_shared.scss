@@ -258,7 +258,13 @@ $supported-tokens: (
     font-family: _token($theme, 'label-text-font');
     font-weight: _token($theme, 'label-text-weight');
     letter-spacing: _token($theme, 'label-text-tracking');
+
+    // Captures the ellipsis behavior for the label.
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
+
   &-button:hover &-button__label {
     color: _token($theme, 'hover-label-text-color');
   }
