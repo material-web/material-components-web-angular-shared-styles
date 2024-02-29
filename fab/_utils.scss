@@ -1,0 +1,65 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+@use 'sass:list';
+@use 'sass:map';
+@use '../elevation/elevation';
+@use '../internal/fonts';
+
+/// To be called before creating theme.
+@function resolve-tokens($tokens) {
+  // Converts elevation tokens from dp to level.
+  $elevation-tokens: (
+    'container-elevation',
+    'disabled-container-elevation',
+    'focus-container-elevation',
+    'hover-container-elevation',
+    'pressed-container-elevation',
+    'lowered-container-elevation',
+    'lowered-focus-container-elevation',
+    'lowered-hover-container-elevation',
+    'lowered-pressed-container-elevation'
+  );
+  @each $elevation-token in $elevation-tokens {
+    @if map.get($tokens, $elevation-token) != null {
+      $level: elevation.dp-to-level(map.get($tokens, $elevation-token));
+      $tokens: map.set($tokens, $elevation-token, $level);
+    }
+  }
+
+  // Resolves label text fonts for backwards compatibility.
+  @if map.get($tokens, 'label-text-font') != null {
+    $font: fonts.rename-google-sans-text-and-add-fallbacks(
+      map.get($tokens, 'label-text-font')
+    );
+    $tokens: map.set($tokens, 'label-text-font', $font);
+  }
+  @return $tokens;
+}
+
+/// Returns a copy of the map only containing the supported tokens.
+@function pick-supported-tokens($tokens, $supported-tokens) {
+  $result: ();
+  @each $token, $val in $tokens {
+    @if list.index($supported-tokens, $token) {
+      $result: map.set($result, $token, map.get($tokens, $token));
+    }
+  }
+  @return $result;
+}
+
+/// Adds token values that FAB theme API supports, but not reflected in Carbon.
+@function add-tokens-outside-carbon($theme, $sys-color) {
+  @return map.merge(
+    $theme,
+    (
+      // Absent for primary, secondary, and tertiary FABs.
+      'container-surface-tint-layer-color': map.get($sys-color, 'surface-tint')
+    )
+  );
+}
