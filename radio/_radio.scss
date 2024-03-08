@@ -158,10 +158,13 @@ $supported-tokens: (
 
   &-radio__background {
     display: inline-block;
+    pointer-events: none;
     position: relative;
     box-sizing: border-box;
     width: $icon-size;
     height: $icon-size;
+    // Ensure the inner and outer circles are above the ripple
+    z-index: 1;
   }
 
   &-radio__background::before {
@@ -222,11 +225,6 @@ $supported-tokens: (
     padding: 0;
     position: absolute;
     z-index: 1;
-  }
-
-  &-radio__ripple {
-    // Ensure ripple is behind the inner and outer circles
-    z-index: -1;
   }
 
   &-radio__native-control:checked ~ &-radio__ripple {
