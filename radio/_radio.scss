@@ -74,15 +74,15 @@ $supported-tokens: (
   @return $result;
 }
 
-/// Adds token values that Checkbox theme API supports, but is not reflected
-/// in Carbon. We do this in order to maintain a consistent API across token
+/// Adds token values that Radio theme API supports, but is not reflected in
+/// Carbon. We do this in order to maintain a consistent API across token
 /// versions.
-/// @param {Map} $theme - The input map.
+/// @param {Map} $map - A map of token names to values.
 /// @param {Map} $sys-color - System color palette.
 /// @return {Map} Returns the map with additional tokens.
-@function add-tokens-outside-carbon($theme, $sys-color) {
+@function add-tokens-outside-carbon($map, $sys-color) {
   @return map.merge(
-    $theme,
+    $map,
     (
       'focus-ring-color': map.get($sys-color, 'secondary'),
       'focus-ring-offset': 2px,

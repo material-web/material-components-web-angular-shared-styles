@@ -53,10 +53,15 @@
   @return $result;
 }
 
-/// Adds token values that FAB theme API supports, but not reflected in Carbon.
-@function add-tokens-outside-carbon($theme, $sys-color) {
+/// Adds token values that Fab theme API supports, but is not reflected in
+/// Carbon. We do this in order to maintain a consistent API across token
+/// versions.
+/// @param {Map} $map - A map of token names to values.
+/// @param {Map} $sys-color - System color palette.
+/// @return {Map} Returns the map with additional tokens.
+@function add-tokens-outside-carbon($map, $sys-color) {
   @return map.merge(
-    $theme,
+    $map,
     (
       // Absent for primary, secondary, and tertiary FABs.
       'container-surface-tint-layer-color': map.get($sys-color, 'surface-tint')
