@@ -18,6 +18,7 @@
 $supported-tokens: (
   // go/keep-sorted start
   'container-height',
+  'container-min-width',
   'container-shape',
   'disabled-label-text-color',
   'disabled-label-text-opacity',
@@ -94,6 +95,7 @@ $supported-tokens: (
       'focus-ring-color': map.get($sys-color, 'secondary'),
       'focus-ring-offset': 2px,
       'with-icon-icon-label-space': 8px,
+      'container-min-width': 64px,
     )
   );
 
@@ -191,7 +193,7 @@ $supported-tokens: (
     user-select: none;
     vertical-align: middle;
     cursor: pointer;
-    min-inline-size: 64px;
+    min-inline-size: _token($theme, 'container-min-width');
     padding-inline-start: _token($theme, 'leading-space');
     padding-inline-end: _token($theme, 'trailing-space');
     block-size: _token($theme, 'container-height');
