@@ -90,7 +90,7 @@ $supported-tokens: (
 
 /// Resolves tokens, transforming input into expected output.
 @function resolve-tokens($map) {
-  // Colors
+  // Colors-
   @return colors.join-color-and-opacity-pairs(
     $map,
     (
@@ -195,6 +195,5 @@ $supported-tokens: (
 
   &-icon-button:disabled {
     color: _token($theme, 'disabled-icon-color');
-    opacity: _token($theme, 'disabled-icon-opacity');
   }
 }

@@ -16,7 +16,6 @@
 $supported-tokens: (
   // go/keep-sorted start
   'disabled-icon-color',
-  'disabled-icon-opacity',
   'focus-ring-color',
   'focus-ring-offset',
   'icon-size',
@@ -146,7 +145,6 @@ $supported-tokens: (
     );
     color: _token($theme, 'disabled-icon-color');
     cursor: default;
-    opacity: _token($theme, 'disabled-icon-opacity');
     pointer-events: none;
   }
   &-icon-button--with-tooltip:disabled {

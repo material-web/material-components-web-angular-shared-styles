@@ -183,7 +183,6 @@ $supported-tokens: (
   }
   &-icon-button--on:disabled {
     background-color: _token($theme, 'disabled-selected-container-color');
-    opacity: _token($theme, 'disabled-selected-container-opacity');
   }
 
   &-icon-button:hover {
@@ -208,7 +207,6 @@ $supported-tokens: (
 
   &-icon-button:disabled {
     color: _token($theme, 'disabled-icon-color');
-    opacity: _token($theme, 'disabled-icon-opacity');
   }
 
   &-icon-button::before {
@@ -228,6 +226,5 @@ $supported-tokens: (
   }
   &-icon-button:disabled::before {
     border-color: _token($theme, 'disabled-unselected-outline-color');
-    opacity: _token($theme, 'disabled-unselected-outline-opacity');
   }
 }
