@@ -22,6 +22,9 @@ $supported-tokens: (
   'container-shape',
   'disabled-label-text-color',
   'disabled-label-text-opacity',
+  'focus-indicator-color',
+  'focus-indicator-outline-offset',
+  'focus-indicator-thickness',
   'focus-label-text-color',
   'focus-ring-color',
   'focus-ring-offset',
@@ -170,13 +173,17 @@ $supported-tokens: (
 /// @see {theme.create}
 /// @see $supported-tokens
 /// @param {Map} $theme - The theme map to use for CSS values.
+/// @param {Map} $old-theme - Theme map created with an old version of tokens.
 /// @throw Error if any keys in $theme are not included in $supported-tokens.
-@mixin abstract-styles($theme) {
+@mixin abstract-styles($theme, $old-theme) {
   @each $key, $val in $theme {
     @if not list.index($supported-tokens, $key) {
       @error 'Token "#{$key}" is not a supported token for component "button_shared" (see $supported-tokens).';
     }
   }
+
+  // TODO(b/333551333): Delete this after all clients are migrated.
+  $ns: &; // Namespace
 
   &-button {
     display: inline-flex;
@@ -208,14 +215,33 @@ $supported-tokens: (
         'pressed-opacity': _token($theme, 'pressed-state-layer-opacity'),
       )
     );
+    // TODO(b/333551333): Delete this block after all clients are migrated.
+    &:where(#{$ns}-button--use-old-tokens) {
+      @include ripple.theme(
+        (
+          'pressed-color': _token($old-theme, 'hover-state-layer-color'),
+          'pressed-opacity': _token($old-theme, 'pressed-state-layer-opacity'),
+        )
+      );
+    }
 
     @include focus_ring_outward.theme(
       (
         'target-shape': _token($theme, 'container-shape'),
-        'color': _token($theme, 'focus-ring-color'),
-        'offset': _token($theme, 'focus-ring-offset'),
+        'color': _token($theme, 'focus-indicator-color'),
+        'offset': _token($theme, 'focus-indicator-outline-offset'),
+        'track-width': _token($theme, 'focus-indicator-thickness'),
       )
     );
+    // TODO(b/333551333): Delete this block after all clients are migrated.
+    &:where(#{$ns}-button--use-old-tokens) {
+      @include focus_ring_outward.theme(
+        (
+          'color': _token($old-theme, 'focus-ring-color'),
+          'offset': _token($old-theme, 'focus-ring-offset'),
+        )
+      );
+    }
   }
 
   &-button__link:focus-visible {

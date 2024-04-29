@@ -101,13 +101,17 @@ $supported-tokens: (
 /// @see {theme.create}
 /// @see $supported-tokens
 /// @param {Map} $theme - The theme map to use for CSS values.
+/// @param {Map} $old-theme - Theme map created with an old version of tokens.
 /// @throw Error if any keys in $theme are not included in $supported-tokens.
-@mixin abstract-styles($theme) {
+@mixin abstract-styles($theme, $old-theme) {
   @each $key, $val in $theme {
     @if not list.index($supported-tokens, $key) {
       @error 'Token "#{$key}" is not a supported token for component "button_elevated" (see $supported-tokens).';
     }
   }
+
+  // TODO(b/333551333): Delete this after all clients are migrated.
+  $ns: &; // Namespace
 
   &-button {
     outline: 1px solid transparent;
@@ -115,15 +119,26 @@ $supported-tokens: (
     // TODO(b/281909437): Remove from each button variant.
     will-change: transform, opacity;
     background-color: _token($theme, 'container-color');
+    // TODO(b/333551333): Delete this block after all clients are migrated.
+    &:where(#{$ns}-button--use-old-tokens) {
+      background-color: _token($old-theme, 'container-color');
+    }
 
     @include elevation.theme(
       (
         'level': _token($theme, 'container-elevation'),
         'shadow-color': _token($theme, 'container-shadow-color'),
-        'surface-tint-layer-color':
-          _token($theme, 'container-surface-tint-layer-color'),
       )
     );
+    // TODO(b/333551333): Delete this block after all clients are migrated.
+    &:where(#{$ns}-button--use-old-tokens) {
+      @include elevation.theme(
+        (
+          'surface-tint-layer-color':
+            _token($old-theme, 'container-surface-tint-layer-color'),
+        )
+      );
+    }
   }
   &-button:hover {
     @include elevation.theme(
