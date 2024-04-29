@@ -195,6 +195,5 @@ $supported-tokens: (
 
   &-icon-button:disabled {
     color: _token($theme, 'disabled-icon-color');
-    opacity: _token($theme, 'disabled-icon-opacity');
   }
 }

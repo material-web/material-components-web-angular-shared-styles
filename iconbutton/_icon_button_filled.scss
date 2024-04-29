@@ -233,10 +233,8 @@ $supported-tokens: (
 
   &-icon-button:disabled {
     background-color: _token($theme, 'disabled-container-color');
-    opacity: _token($theme, 'disabled-container-opacity');
   }
   &-icon-button:disabled &-icon-button__icon-slot {
     color: _token($theme, 'disabled-icon-color');
-    opacity: _token($theme, 'disabled-icon-opacity');
   }
 }
