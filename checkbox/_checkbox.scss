@@ -118,7 +118,7 @@ $supported-tokens: (
 /// @param {Map} $theme - The theme map to use for CSS values.
 /// @param {Map} $form-field-override-values - Temporary map of form field values based on tokens.
 /// @throw Error if any keys in $theme are not included in $supported-tokens.
-@mixin abstract-styles($theme, $form-field-override-values) {
+@mixin abstract-styles($theme, $old-theme, $form-field-override-values) {
   @each $key, $val in $theme {
     @if not list.index($supported-tokens, $key) {
       @error 'Token "#{$key}" is not a supported token for component "checkbox" (see $supported-tokens).';
@@ -128,6 +128,8 @@ $supported-tokens: (
   $state-layer-size: _token($theme, 'state-layer-size');
   $touch-target-size: _token($theme, 'touch-target-size');
 
+  // TODO(b/337947777): Remove this when new tokens are the only ones used
+  $ns: &; // Namespace
   &-checkbox {
     align-items: center;
     box-sizing: content-box;
@@ -155,7 +157,18 @@ $supported-tokens: (
         'shape': 50%,
       )
     );
-
+    &:where(#{$ns}-checkbox--use-old-tokens) {
+      @include ripple.theme(
+        (
+          'hover-color': _token($old-theme, 'unselected-hover-state-layer-color'),
+          'hover-opacity': _token($old-theme, 'unselected-hover-state-layer-opacity'),
+          'pressed-color': _token($old-theme, 'unselected-pressed-state-layer-color'),
+          'pressed-opacity':
+            _token($old-theme, 'unselected-pressed-state-layer-opacity'),
+          'shape': 50%,
+        )
+      );
+    }
     @include focus_ring_outward.theme(
       (
         'color': map.get($theme, 'focus-ring-color'),
@@ -184,6 +197,17 @@ $supported-tokens: (
           _token($theme, 'selected-pressed-state-layer-opacity'),
       )
     );
+    &:where(#{$ns}-checkbox--use-old-tokens) {
+      @include ripple.theme(
+      (
+        'hover-color': _token($old-theme, 'selected-hover-state-layer-color'),
+        'hover-opacity': _token($old-theme, 'selected-hover-state-layer-opacity'),
+        'pressed-color': _token($old-theme, 'selected-pressed-state-layer-color'),
+        'pressed-opacity':
+          _token($old-theme, 'selected-pressed-state-layer-opacity'),
+      )
+      );
+    }
   }
 
   &-checkbox__native-control:disabled ~ &-checkbox__ripple {
