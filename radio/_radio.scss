@@ -112,7 +112,7 @@ $supported-tokens: (
 /// @param {Map} $theme - The theme map to use for CSS values.
 /// @param {Map} $form-field-override-values - Temporary map of form field values based on tokens.
 /// @throw Error if any keys in $theme are not included in $supported-tokens.
-@mixin abstract-styles($theme, $form-field-override-values) {
+@mixin abstract-styles($theme, $old-theme, $form-field-override-values) {
   @each $key, $val in $theme {
     @if not list.index($supported-tokens, $key) {
       @error 'Token "#{$key}" is not a supported token for component "radio" (see $supported-tokens).';
@@ -152,6 +152,21 @@ $supported-tokens: (
     );
   }
 
+  &-radio--use-old-tokens {
+    @include ripple.theme(
+      (
+        'hover-color': _token($old-theme, 'unselected-hover-state-layer-color'),
+        'hover-opacity':
+          _token($old-theme, 'unselected-hover-state-layer-opacity'),
+        'pressed-color':
+          _token($old-theme, 'unselected-pressed-state-layer-color'),
+        'pressed-opacity':
+          _token($old-theme, 'unselected-pressed-state-layer-opacity'),
+        'shape': 50%,
+      )
+    );
+  }
+
   &-radio--touch {
     margin: 4px;
   }
@@ -179,14 +194,16 @@ $supported-tokens: (
     position: absolute;
     top: $padding-offset;
     transform: scale(0, 0);
-    transition: opacity 120ms 0ms cubic-bezier(0.4, 0, 0.6, 1),
+    transition:
+      opacity 120ms 0ms cubic-bezier(0.4, 0, 0.6, 1),
       transform 120ms 0ms cubic-bezier(0.4, 0, 0.6, 1);
     width: $size;
   }
   &-radio__native-control:focus + &-radio__background::before {
     opacity: 0.12;
     transform: scale(1);
-    transition: opacity 120ms 0ms cubic-bezier(0, 0, 0.2, 1),
+    transition:
+      opacity 120ms 0ms cubic-bezier(0, 0, 0.2, 1),
       transform 120ms 0ms cubic-bezier(0, 0, 0.2, 1);
   }
 
@@ -213,7 +230,8 @@ $supported-tokens: (
     position: absolute;
     top: 0;
     transform: scale(0, 0);
-    transition: transform 120ms 0ms cubic-bezier(0.4, 0, 0.6, 1),
+    transition:
+      transform 120ms 0ms cubic-bezier(0.4, 0, 0.6, 1),
       border-color 120ms 0ms cubic-bezier(0.4, 0, 0.6, 1);
     width: 100%;
   }
@@ -238,10 +256,24 @@ $supported-tokens: (
       )
     );
   }
+  &-radio--use-old-tokens &-radio__native-control:checked ~ &-radio__ripple {
+    @include ripple.theme(
+      (
+        'hover-color': _token($old-theme, 'selected-hover-state-layer-color'),
+        'hover-opacity':
+          _token($old-theme, 'selected-hover-state-layer-opacity'),
+        'pressed-color':
+          _token($old-theme, 'selected-pressed-state-layer-color'),
+        'pressed-opacity':
+          _token($old-theme, 'selected-pressed-state-layer-opacity'),
+      )
+    );
+  }
 
   // Transitions
   &-radio__native-control:is(:checked, :disabled) + &-radio__background {
-    transition: opacity 120ms 0ms cubic-bezier(0, 0, 0.2, 1),
+    transition:
+      opacity 120ms 0ms cubic-bezier(0, 0, 0.2, 1),
       transform 120ms 0ms cubic-bezier(0, 0, 0.2, 1);
   }
 
@@ -257,7 +289,8 @@ $supported-tokens: (
   &-radio__native-control:is(:checked, :disabled)
     + &-radio__background
     &-radio__inner-circle {
-    transition: transform 120ms 0ms cubic-bezier(0, 0, 0.2, 1),
+    transition:
+      transform 120ms 0ms cubic-bezier(0, 0, 0.2, 1),
       border-color 120ms 0ms cubic-bezier(0, 0, 0.2, 1);
   }
 
