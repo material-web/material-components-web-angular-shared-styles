@@ -9,6 +9,7 @@
 @use 'sass:list';
 @use 'sass:map';
 @use '../internal/theme';
+@use '../internal/map-ext';
 
 /// The list of supported themeable tokens for this component variant.
 $supported-tokens: (
@@ -33,7 +34,7 @@ $supported-tokens: (
   @if not list.index($supported-tokens, $key) {
     @error 'Token "#{$key}" is not a supported token for component "focus-ring-inward". Consider adding it to $supported-tokens.';
   }
-  @return map.get($map, $key);
+  @return map-ext.get($map, $key);
 }
 
 /// Emits CSS custom properties for the given input map.

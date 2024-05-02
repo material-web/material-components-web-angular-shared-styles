@@ -13,6 +13,7 @@
 @use '../internal/shape';
 @use '../internal/theme';
 @use '../ripple/ripple';
+@use '../internal/map-ext';
 
 // Supported tokens shared in all fabs.
 $supported-tokens: (
@@ -47,7 +48,7 @@ $icon-delay: 90ms;
   {
     @error '"#{$token}" is not a supported token for "FAB".';
   }
-  @return map.get($map, $token);
+  @return map-ext.get($map, $token);
 }
 
 /// Emits CSS custom properties for given theme map.

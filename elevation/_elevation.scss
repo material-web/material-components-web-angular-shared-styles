@@ -9,6 +9,7 @@
 @use 'sass:list';
 @use 'sass:map';
 @use 'sass:meta';
+@use '../internal/map-ext';
 @use '../internal/theme';
 
 /// The list of supported themeable tokens for this component variant.
@@ -31,7 +32,7 @@ $supported-tokens: (
   @if not list.index($supported-tokens, $key) {
     @error 'Token "#{$key}" is not a supported token for component "elevation". Consider adding it to $supported-tokens.';
   }
-  @return map.get($map, $key);
+  @return map-ext.get($map, $key);
 }
 
 // TODO(b/261602454): remove once tokens are updated to use level instead of dp.

@@ -8,6 +8,7 @@
 
 @use 'sass:list';
 @use 'sass:map';
+@use '../internal/map-ext';
 @use '../internal/theme';
 
 // Supported tokens specific to fab icon colors.
@@ -24,7 +25,7 @@ $supported-tokens: (
   @if not list.index($supported-tokens, $token) {
     @error '"#{$token}" is not a supported token for "FAB icon".';
   }
-  @return map.get($map, $token);
+  @return map-ext.get($map, $token);
 }
 
 /// Emits CSS custom properties for given theme map.

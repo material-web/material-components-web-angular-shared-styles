@@ -8,6 +8,7 @@
 
 @use 'sass:list';
 @use 'sass:map';
+@use '../internal/map-ext';
 @use '../internal/theme';
 
 /// The list of supported themeable tokens for this component variant.
@@ -25,7 +26,7 @@ $supported-tokens: (
   @if not list.index($supported-tokens, $key) {
     @error "Token '#{$key}' is not a supported token for component 'ripple'. Consider adding it to $supported-tokens";
   }
-  @return map.get($map, $key);
+  @return map-ext.get($map, $key);
 }
 
 @mixin theme($theme) {
